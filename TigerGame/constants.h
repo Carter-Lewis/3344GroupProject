@@ -8,7 +8,7 @@
 #ifndef CONSTANTS_H_
 #define CONSTANTS_H_
 
-const bool TESTING = false;
+const bool TESTING = true;
 const bool TESTING1 = false;
 const bool TESTING2 = false;
 
