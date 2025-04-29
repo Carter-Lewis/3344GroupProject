@@ -138,16 +138,20 @@ public:
     }
 
 
-    void setOldLocation(Point p){
+    void setOldLocation(Point p) {
         oldLocation = p;
     }
 
-    void setMoving(bool flag){
+    void setMoving(bool flag) {
         moving = flag;
     }
 
-    void setSize(int s){
+    void setSize(int s) {
         size = s;
+    }
+
+    static void steve() {
+        cout << "STEVE" << endl;
     }
 
 };
