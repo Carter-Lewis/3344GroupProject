@@ -10,7 +10,7 @@
 
 const bool TESTING = true;
 const bool TESTING1 = false;
-const bool TESTING2 = false;
+const bool TESTING2 = true;
 
 const int TIGER = 0;
 const int MIN_MEN = 1;
