@@ -6,17 +6,20 @@
 #define TIGERGAME_TIGERSNTURTLENECKS_H
 
 #include "constants.h"
-
+Token_t tiger;
 int horizontalDistanceToTiger(Token_t token, Token_t tiger);
 struct compareMenByColumn {
     bool operator()(Token_t t1, Token_t t2) {
-        return t1.location.row < t2.location.row;
+        if(t1.location.row != t2.location.row) return t1.location.row < t2.location.row;
+        return horizontalDistanceToTiger(t1, tiger) < horizontalDistanceToTiger(t2, tiger);
     }
 };
 bool menAboveAttackLine (vector<Token_t> tokens);
 Move_t marchForward(vector<Token_t> tokens);
 
 Move_t Move_TigersNTurtlenecks (vector<Token_t> tokens, Color_t turn) {
+
+    tiger = tokens.at(0);
     if(turn == BLUE) {
         bool marchingForward = !menAboveAttackLine(tokens);
         if(marchingForward) {
@@ -77,7 +80,7 @@ Move_t marchForward(vector<Token_t> tokens) {
 }
 
 int horizontalDistanceToTiger(Token_t token, Token_t tiger) {
-
+    return abs(token.location.col-tiger.location.col);
 }
 
 
