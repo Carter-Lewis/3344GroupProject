@@ -19,9 +19,89 @@ struct marchMenPriority {
         return horizontalDistanceToTiger(t1, tiger) < horizontalDistanceToTiger(t2, tiger);
     }
 };
+
+set<pair<Point, Point>> diagonalEdgeList() {
+    set<pair<Point, Point>> edges;
+    edges.insert(make_pair(Point(0, 4), Point(1, 3)));
+    edges.insert(make_pair(Point(1, 3), Point(0, 4)));
+    edges.insert(make_pair(Point(0, 4), Point(1, 5)));
+    edges.insert(make_pair(Point(1, 5), Point(0, 4)));
+    edges.insert(make_pair(Point(1, 3), Point(2, 2)));
+    edges.insert(make_pair(Point(2, 2), Point(1, 3)));
+    edges.insert(make_pair(Point(2, 2), Point(3, 3)));
+    edges.insert(make_pair(Point(3, 3), Point(2, 2)));
+    edges.insert(make_pair(Point(1, 3), Point(2, 4)));
+    edges.insert(make_pair(Point(2, 4), Point(1, 3)));
+    edges.insert(make_pair(Point(2, 4), Point(3, 3)));
+    edges.insert(make_pair(Point(3, 3), Point(2, 4)));
+    edges.insert(make_pair(Point(1, 5), Point(2, 4)));
+    edges.insert(make_pair(Point(2, 4), Point(1, 5)));
+    edges.insert(make_pair(Point(1, 5), Point(2, 6)));
+    edges.insert(make_pair(Point(2, 6), Point(1, 5)));
+    edges.insert(make_pair(Point(2, 4), Point(3, 5)));
+    edges.insert(make_pair(Point(3, 5), Point(2, 4)));
+    edges.insert(make_pair(Point(2, 6), Point(3, 5)));
+    edges.insert(make_pair(Point(3, 5), Point(2, 6)));
+    edges.insert(make_pair(Point(3, 3), Point(4, 4)));
+    edges.insert(make_pair(Point(4, 4), Point(3, 3)));
+    edges.insert(make_pair(Point(3, 5), Point(4, 4)));
+    edges.insert(make_pair(Point(4, 4), Point(3, 5)));
+
+    edges.insert(make_pair(Point(4, 4), Point(5, 3)));
+    edges.insert(make_pair(Point(5, 3), Point(4, 4)));
+
+    edges.insert(make_pair(Point(5, 3), Point(6, 2)));
+    edges.insert(make_pair(Point(6, 2), Point(5, 3)));
+
+    edges.insert(make_pair(Point(6, 2), Point(7, 1)));
+    edges.insert(make_pair(Point(7, 1), Point(6, 2)));
+
+    edges.insert(make_pair(Point(7, 1), Point(8, 0)));
+    edges.insert(make_pair(Point(8, 0), Point(7, 1)));
+
+    edges.insert(make_pair(Point(8, 0), Point(9, 1)));
+    edges.insert(make_pair(Point(9, 1), Point(8, 0)));
+
+    edges.insert(make_pair(Point(9, 1), Point(10, 2)));
+    edges.insert(make_pair(Point(10, 2), Point(9, 1)));
+
+    edges.insert(make_pair(Point(10, 2), Point(11, 3)));
+    edges.insert(make_pair(Point(11, 3), Point(10, 2)));
+
+    edges.insert(make_pair(Point(11, 3), Point(12, 4)));
+    edges.insert(make_pair(Point(12, 4), Point(11, 3)));
+
+    edges.insert(make_pair(Point(12, 4), Point(11, 5)));
+    edges.insert(make_pair(Point(11, 5), Point(12, 4)));
+
+    edges.insert(make_pair(Point(11, 5), Point(10, 6)));
+    edges.insert(make_pair(Point(10, 6), Point(11, 5)));
+
+    edges.insert(make_pair(Point(10, 6), Point(9, 7)));
+    edges.insert(make_pair(Point(9, 7), Point(10, 6)));
+
+    edges.insert(make_pair(Point(9, 7), Point(8, 8)));
+    edges.insert(make_pair(Point(8, 8), Point(9, 7)));
+
+    edges.insert(make_pair(Point(8, 8), Point(7, 7)));
+    edges.insert(make_pair(Point(7, 7), Point(8, 8)));
+
+    edges.insert(make_pair(Point(7, 7), Point(6, 6)));
+    edges.insert(make_pair(Point(6, 6), Point(7, 7)));
+
+    edges.insert(make_pair(Point(6, 6), Point(5, 5)));
+    edges.insert(make_pair(Point(5, 5), Point(6, 6)));
+
+    edges.insert(make_pair(Point(5, 5), Point(4, 4)));
+    edges.insert(make_pair(Point(4, 4), Point(5, 5)));
+
+    return edges;
+}
+
 bool menAboveAttackLine (vector<Token_t> tokens);
 Move_t marchForward(vector<Token_t> tokens);
 
+//TODO this is the main function
 Move_t Move_TigersNTurtlenecks (vector<Token_t> tokens, Color_t turn) {
 
     tiger = tokens.at(0);
@@ -39,8 +119,111 @@ Move_t Move_TigersNTurtlenecks (vector<Token_t> tokens, Color_t turn) {
     }
 
     return {tokens[1], {5,5}};
+}
+enum direction{
+    NONE,N,NE,E,SE,S,SW,W,NW
+};
 
+double distance(Point_t p1, Point_t p2) {
+    return sqrt(pow(p1.col - p2.col, 2) + pow(p1.row - p2.row, 2));
+}
 
+direction hasEdgeBetween(Point_t point1, Point_t point2) {
+    direction p1_direction_of_p2 = NONE;
+
+    switch (point1.row - point2.row) {
+        case 1: p1_direction_of_p2 = E; break;
+        case -1: p1_direction_of_p2 = W; break;
+        default: break;
+    }
+    switch (point1.col - point2.col) {
+        case 1: p1_direction_of_p2 = S; break;
+        case -1: p1_direction_of_p2 = N; break;
+        default: break;
+    }
+
+    if (p1_direction_of_p2 == NONE) {
+        pair<Point, Point> edge = make_pair(Point(point1.row, point1.col),
+                                            Point(point2.row, point2.col));
+
+        for (pair<Point, Point> e: diagonalEdgeList()) {
+            if (e == edge) {
+                if (point1.row+1 == point2.row) {
+                    switch (point1.col - point2.col) {
+                        case 1: p1_direction_of_p2 = NE; break;
+                        case -1: p1_direction_of_p2 = NW; break;
+                        default: break;
+                    }
+                }
+                else if (point1.row-1 == point2.row) {
+                    switch (point1.col - point2.col) {
+                        case 1: p1_direction_of_p2 = SE; break;
+                        case -1: p1_direction_of_p2 = SW; break;
+                        default: break;
+                    }
+                }
+            }
+        }
+    }
+
+    return p1_direction_of_p2;
+}
+
+bool isJumpable(const vector<Token_t> &tokens, const Token_t t) {
+    bool result = true;
+
+    direction tiger_direction_of_token = hasEdgeBetween(tokens[0].location, t.location);
+    Point_t location = t.location;
+    switch (tiger_direction_of_token) {
+        case N:
+            location.row += 1;
+            break;
+        case NE:
+            location.row += 1;
+            location.col -= 1;
+            break;
+        case E:
+            location.col -= 1;
+            break;
+        case SE:
+            location.row -= 1;
+            location.col -= 1;
+            break;
+        case S:
+            location.row -= 1;
+            break;
+        case SW:
+            location.row -= 1;
+            location.col += 1;
+            break;
+        case W:
+            location.col += 1;
+            break;
+        case NW:
+            location.row += 1;
+            location.col += 1;
+            break;
+        default: break;
+    }
+
+    for (Token_t temp: tokens) {
+        if (temp.location == location) {
+            result = false;
+        }
+    }
+
+    return result;
+}
+
+vector<Token_t> getJumpableMen(const vector<Token_t> &tokens) {
+    vector<Token_t> jumpableMen;
+    for (Token_t t : tokens) {
+        if (isJumpable(tokens, t)) {
+            jumpableMen.push_back(t);
+        }
+    }
+
+    return jumpableMen;
 }
 
 bool menAboveAttackLine (vector<Token_t> tokens) {
