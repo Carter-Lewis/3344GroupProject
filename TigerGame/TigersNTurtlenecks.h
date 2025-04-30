@@ -6,19 +6,9 @@
 #define TIGERGAME_TIGERSNTURTLENECKS_H
 
 #include "constants.h"
+
+//TODO why is this here...?
 Token_t tiger;
-bool canBeJumped(Token_t man);
-bool onDiagonalSquare(Token_t man);
-vector<point> potentialJumpLocations();
-bool onPositiveDiagonal();
-bool onNegativeDiagonal();
-int horizontalDistanceToTiger(Token_t token, Token_t tiger);
-struct marchMenPriority {
-    bool operator()(Token_t t1, Token_t t2) {
-        if(t1.location.row != t2.location.row) return t1.location.row < t2.location.row;
-        return horizontalDistanceToTiger(t1, tiger) < horizontalDistanceToTiger(t2, tiger);
-    }
-};
 
 set<pair<Point, Point>> diagonalEdgeList() {
     set<pair<Point, Point>> edges;
@@ -97,9 +87,32 @@ set<pair<Point, Point>> diagonalEdgeList() {
 
     return edges;
 }
+enum direction{ NONE,N,NE,E,SE,S,SW,W,NW };
 
+Move_t Move_TigersNTurtlenecks (vector<Token_t> tokens, Color_t turn);
+double distance(Point_t p1, Point_t p2);
+direction hasEdgeBetween(Point_t point1, Point_t point2);
+bool isJumpable(const vector<Token_t>& tokens, const Token_t t);
+vector<Token_t> getJumpableMen(const vector<Token_t>& tokens);
 bool menAboveAttackLine (vector<Token_t> tokens);
+Move_t marchForward(Token_t token);
+bool empty(Point_t p, vector<Token_t> tokens);
 Move_t marchForward(vector<Token_t> tokens);
+int horizontalDistanceToTiger(Token_t token, Token_t tiger);
+
+//TODO: following functions not done yet
+bool onDiagonalSquare(Token_t man);
+vector<Move_t> getForkMoves (vector<Token_t> tokens);
+vector<point> potentialJumpLocations();
+bool onPositiveDiagonal();
+bool onNegativeDiagonal();
+
+struct marchMenPriority {
+    bool operator()(Token_t t1, Token_t t2) {
+        if(t1.location.row != t2.location.row) return t1.location.row < t2.location.row;
+        return horizontalDistanceToTiger(t1, tiger) < horizontalDistanceToTiger(t2, tiger);
+    }
+};
 
 //TODO this is the main function
 Move_t Move_TigersNTurtlenecks (vector<Token_t> tokens, Color_t turn) {
@@ -120,9 +133,6 @@ Move_t Move_TigersNTurtlenecks (vector<Token_t> tokens, Color_t turn) {
 
     return {tokens[1], {5,5}};
 }
-enum direction{
-    NONE,N,NE,E,SE,S,SW,W,NW
-};
 
 double distance(Point_t p1, Point_t p2) {
     return sqrt(pow(p1.col - p2.col, 2) + pow(p1.row - p2.row, 2));
@@ -206,13 +216,7 @@ bool isJumpable(const vector<Token_t> &tokens, const Token_t t) {
         default: break;
     }
 
-    for (Token_t temp: tokens) {
-        if (temp.location == location) {
-            result = false;
-        }
-    }
-
-    return result;
+    result = empty(location, tokens);
 }
 
 vector<Token_t> getJumpableMen(const vector<Token_t> &tokens) {
@@ -265,21 +269,7 @@ int horizontalDistanceToTiger(Token_t token, Token_t tiger) {
     return abs(token.location.col-tiger.location.col);
 }
 
-bool canBeJumped(Token_t man) {
-    bool ans = false;
-    Point p1(tiger.location.row, tiger.location.col);
-    Point p2(man.location.row, man.location.col);
-    Point mid = p1.midPoint(p2);
-//    if() {
-//
-//    }
-}
-
 bool onDiagonalSquare(Token_t man) {
-
-}
-
-vector<Token_t> getJumpableMen(vector<Token_t> tokens) {
 
 }
 
