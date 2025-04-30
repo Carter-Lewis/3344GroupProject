@@ -7,8 +7,13 @@
 
 #include "constants.h"
 Token_t tiger;
+bool canBeJumped(Token_t man);
+bool onDiagonalSquare(Token_t man);
+vector<point> potentialJumpLocations();
+bool onPositiveDiagonal();
+bool onNegativeDiagonal();
 int horizontalDistanceToTiger(Token_t token, Token_t tiger);
-struct compareMenByColumn {
+struct marchMenPriority {
     bool operator()(Token_t t1, Token_t t2) {
         if(t1.location.row != t2.location.row) return t1.location.row < t2.location.row;
         return horizontalDistanceToTiger(t1, tiger) < horizontalDistanceToTiger(t2, tiger);
@@ -40,17 +45,9 @@ Move_t Move_TigersNTurtlenecks (vector<Token_t> tokens, Color_t turn) {
 
 bool menAboveAttackLine (vector<Token_t> tokens) {
     for(Token_t i: tokens) {
-        if(i.color==BLUE&&i.location.row> 5) return false;
+        if(i.color==BLUE&&i.location.row > 6) return false;
     }
     return true;
-}
-
-vector<Token_t> getJumpableMen(vector<Token_t> tokens) {
-
-}
-
-vector<Move_t> getForkMoves (vector<Token_t> tokens) {
-
 }
 
 Move_t marchForward(Token_t token) {
@@ -65,7 +62,7 @@ bool empty(Point_t p, vector<Token_t> tokens) {
 }
 
 Move_t marchForward(vector<Token_t> tokens) {
-    priority_queue<Token_t, vector<Token_t>, compareMenByColumn> sortedMen;
+    priority_queue<Token_t, vector<Token_t>, marchMenPriority> sortedMen;
     for(Token_t i : tokens) {
         if(i.color == BLUE) {
             sortedMen.push(i);
@@ -83,6 +80,50 @@ Move_t marchForward(vector<Token_t> tokens) {
 
 int horizontalDistanceToTiger(Token_t token, Token_t tiger) {
     return abs(token.location.col-tiger.location.col);
+}
+
+bool canBeJumped(Token_t man) {
+    bool ans = false;
+    Point p1(tiger.location.row, tiger.location.col);
+    Point p2(man.location.row, man.location.col);
+    Point mid = p1.midPoint(p2);
+//    if() {
+//
+//    }
+}
+
+bool onDiagonalSquare(Token_t man) {
+
+}
+
+vector<Token_t> getJumpableMen(vector<Token_t> tokens) {
+
+}
+
+vector<Move_t> getForkMoves (vector<Token_t> tokens) {
+
+}
+
+vector<point> potentialJumpLocations() {
+
+}
+/*
+ * TODO fill in all Positive Diagonal coordinates
+ * Positive meaning it would have a positive slope in xy plane
+ */
+bool onPositiveDiagonal() {
+//    return tiger.location.row == 12 && tiger.location.col == 3
+//        &&
+//        &&
+//        &&
+//        &&;
+}
+
+/*
+ * TODO do the same for negative diagonals
+ */
+bool onNegativeDiagonal() {
+
 }
 
 
