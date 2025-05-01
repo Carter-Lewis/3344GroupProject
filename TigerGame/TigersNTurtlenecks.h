@@ -91,14 +91,18 @@ Move_t Move_TigersNTurtlenecks (vector<Token_t> tokens, Color_t turn);
 double distance(Point_t p1, Point_t p2);
 direction hasEdgeBetween(Point_t point1, Point_t point2);
 bool isJumpable(const vector<Token_t>& tokens, const Token_t t);
-vector<Token_t> getJumpableMen(const vector<Token_t>& tokens);
+bool empty(Point_t p, vector<Token_t> tokens);
+
+//Man Functions
 bool menAboveAttackLine (vector<Token_t> tokens);
 Move_t marchForward(Token_t token);
-Move_t moveTowardMostMen(const vector<Token_t>& tokens);
-bool empty(Point_t p, vector<Token_t> tokens);
 Move_t marchForward(vector<Token_t> tokens);
-Move_t tigerJump(vector<Token_t> tokens);
 int horizontalDistanceToTiger(Token_t token, Token_t tiger);
+
+//Tiger Functions
+vector<Token_t> getJumpableMen(const vector<Token_t>& tokens);
+Move_t moveTowardMostMen(const vector<Token_t>& tokens);
+Move_t tigerJump(vector<Token_t> tokens);
 Move_t moveTowardClosestMan(const vector<Token_t>& tokens);
 int totalDistanceToAllMen(Point_t p, vector<Token_t> tokens);
 
@@ -352,7 +356,7 @@ Move_t moveTowardMostMen(const vector<Token_t>& tokens) {
         Point_t next = {current.row + d[i][0], current.col + d[i][1]};
 
         // Must be within bounds
-        if (next.row < 0 || next.row >= GRID_ROW || next.col < 0 || next.col >= GRID_COL)
+        if (next.row < 0 || next.row > GRID_ROW || next.col < 0 || next.col > GRID_COL)
             continue;
 
         // Must be a legal board edge
