@@ -85,14 +85,9 @@ public:
         token[0].setLocation(Point(2, 4));
         //token[0].setLocation(Point(columnToX(4), rowToY(2)));
 
-
         team[0].name = "Team Name";
 
-
         team[0].functionName = "Move_TeamName";
-
-
-
 
         for(int i = 1; i <= 18; i++){
             token[i].setColor(blue);
@@ -1169,8 +1164,6 @@ public:
         displayFile(Point(COLUMNS-274-400, ROWS-247-25),"teams.bmp.txt",g);
 
     }
-
-
 
 };
 

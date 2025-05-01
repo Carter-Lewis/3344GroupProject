@@ -139,44 +139,28 @@ double distance(Point_t p1, Point_t p2) {
 }
 
 direction hasEdgeBetween(Point_t point1, Point_t point2) {
-    direction p1_direction_of_p2 = NONE;
+    int rowDiff = point1.row - point2.row;
+    int colDiff = point1.col - point2.col;
 
-    switch (point1.row - point2.row) {
-        case 1: p1_direction_of_p2 = E; break;
-        case -1: p1_direction_of_p2 = W; break;
-        default: break;
-    }
-    switch (point1.col - point2.col) {
-        case 1: p1_direction_of_p2 = S; break;
-        case -1: p1_direction_of_p2 = N; break;
-        default: break;
-    }
+    // Check 4 simple directions
+    if (rowDiff == -1 && colDiff ==  0) return N;
+    if (rowDiff ==  0 && colDiff ==  1) return E;
+    if (rowDiff ==  1 && colDiff ==  0) return S;
+    if (rowDiff ==  0 && colDiff == -1) return W;
 
-    if (p1_direction_of_p2 == NONE) {
-        pair<Point, Point> edge = make_pair(Point(point1.row, point1.col),
+    pair<Point, Point> edge = make_pair(Point(point1.row, point1.col),
                                             Point(point2.row, point2.col));
 
-        for (pair<Point, Point> e: diagonalEdgeList()) {
-            if (e == edge) {
-                if (point1.row+1 == point2.row) {
-                    switch (point1.col - point2.col) {
-                        case 1: p1_direction_of_p2 = NE; break;
-                        case -1: p1_direction_of_p2 = NW; break;
-                        default: break;
-                    }
-                }
-                else if (point1.row-1 == point2.row) {
-                    switch (point1.col - point2.col) {
-                        case 1: p1_direction_of_p2 = SE; break;
-                        case -1: p1_direction_of_p2 = SW; break;
-                        default: break;
-                    }
-                }
-            }
+    for (pair<Point, Point> e: diagonalEdgeList()) {
+        if (e == edge) {
+            if (rowDiff == -1 && colDiff ==  1) return NE;
+            if (rowDiff ==  1 && colDiff ==  1) return SE;
+            if (rowDiff ==  1 && colDiff == -1) return SW;
+            if (rowDiff == -1 && colDiff == -1) return NW;
         }
     }
 
-    return p1_direction_of_p2;
+    return NONE;
 }
 
 bool isJumpable(const vector<Token_t> &tokens, const Token_t t) {
