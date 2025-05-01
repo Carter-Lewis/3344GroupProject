@@ -94,9 +94,13 @@ bool isJumpable(const vector<Token_t>& tokens, const Token_t t);
 vector<Token_t> getJumpableMen(const vector<Token_t>& tokens);
 bool menAboveAttackLine (vector<Token_t> tokens);
 Move_t marchForward(Token_t token);
+Move_t moveTowardMostMen(const vector<Token_t>& tokens);
 bool empty(Point_t p, vector<Token_t> tokens);
 Move_t marchForward(vector<Token_t> tokens);
+Move_t tigerJump(vector<Token_t> tokens);
 int horizontalDistanceToTiger(Token_t token, Token_t tiger);
+Move_t moveTowardClosestMan(const vector<Token_t>& tokens);
+int totalDistanceToAllMen(Point_t p, vector<Token_t> tokens);
 
 //TODO: following functions not done yet
 bool onDiagonalSquare(Token_t man);
@@ -125,8 +129,14 @@ Move_t Move_TigersNTurtlenecks (vector<Token_t> tokens, Color_t turn) {
 
         }
     }
+    //Tiger algorithm
     else {
-
+        if(getJumpableMen(tokens).size() > 0) {
+            return tigerJump(tokens);
+        }
+        else {
+            moveTowardMostMen(tokens);
+        }
     }
 
     return {tokens[1], {5,5}};
@@ -141,6 +151,9 @@ direction hasEdgeBetween(Point_t point1, Point_t point2) {
     int colDiff = point2.col - point1.col;
 
     // Check all 8 directions
+    if(point1.row < 4) {
+        if(rowDiff == 0 || colDiff == 0) return NONE;
+    }
     if (rowDiff == -1 && colDiff ==  0) return N;
     if (rowDiff == -1 && colDiff ==  1) return NE;
     if (rowDiff ==  0 && colDiff ==  1) return E;
@@ -204,7 +217,6 @@ vector<Token_t> getJumpableMen(const vector<Token_t> &tokens) {
             jumpableMen.push_back(t);
         }
     }
-
     return jumpableMen;
 }
 
@@ -266,18 +278,7 @@ int horizontalDistanceToTiger(Token_t token, Token_t tiger) {
     return abs(token.location.col-tiger.location.col);
 }
 
-bool canBeJumped(Token_t man) {
-    bool ans = false;
-    Point p1(tiger.location.row, tiger.location.col);
-    Point p2(man.location.row, man.location.col);
-    Point mid = p1.midPoint(p2);
-}
-
 bool onDiagonalSquare(Token_t man) {
-
-}
-
-vector<Token_t> getJumpableMen(vector<Token_t> tokens) {
 
 }
 
@@ -287,6 +288,28 @@ vector<Move_t> getForkMoves (vector<Token_t> tokens) {
 
 vector<point> potentialJumpLocations() {
 
+}
+
+Move_t tigerJump(vector<Token_t> tokens) {
+    vector<Token_t> jumpableMen = getJumpableMen(tokens);
+    switch(hasEdgeBetween(tiger.location, jumpableMen.at(0).location)) {
+        case N:
+            return {tiger, {tiger.location.row-2, tiger.location.col}};
+        case NE:
+            return {tiger, {tiger.location.row-2, tiger.location.col+2}};
+        case E:
+            return {tiger, {tiger.location.row, tiger.location.col+2}};
+        case SE:
+            return {tiger, {tiger.location.row+2, tiger.location.col+2}};
+        case S:
+            return {tiger, {tiger.location.row+2, tiger.location.col}};
+        case SW:
+            return {tiger, {tiger.location.row+2, tiger.location.col-2}};
+        case W:
+            return {tiger, {tiger.location.row, tiger.location.col-2}};
+        case NW:
+            return {tiger, {tiger.location.row-2, tiger.location.col-2}};
+    }
 }
 /*
  * TODO fill in all Positive Diagonal coordinates
@@ -311,6 +334,108 @@ bool tigerOnPositiveDiagonal() {
 bool onNegativeDiagonal() {
 
 }
+
+Move_t moveTowardMostMen(const vector<Token_t>& tokens) {
+    Token_t tiger = tokens[0];
+    Point_t current = tiger.location;
+
+    const int d[8][2] = {
+            {-1,  0}, {-1,  1}, {0,  1}, {1,  1},
+            { 1,  0}, { 1, -1}, {0, -1}, {-1, -1}
+    };
+
+    Move_t bestMove = {tiger, current};  // fallback to no move
+    int minTotalDistance = INT_MAX;
+    bool foundValidMove = false;
+
+    for (int i = 0; i < 8; i++) {
+        Point_t next = {current.row + d[i][0], current.col + d[i][1]};
+
+        // Must be within bounds
+        if (next.row < 0 || next.row >= GRID_ROW || next.col < 0 || next.col >= GRID_COL)
+            continue;
+
+        // Must be a legal board edge
+        if (hasEdgeBetween(current, next) == NONE)
+            continue;
+
+        // Must be empty
+        if (!empty(next, tokens))
+            continue;
+
+        // Calculate total distance from 'next' to all blue tokens
+        int totalDistance = totalDistanceToAllMen(next, tokens);
+
+        if (totalDistance < minTotalDistance) {
+            minTotalDistance = totalDistance;
+            bestMove = {tiger, next};
+            foundValidMove = true;
+        }
+    }
+
+    return foundValidMove ? bestMove : Move_t{tiger, current};  // fallback to no-op
+}
+
+Move_t moveTowardClosestMan(const vector<Token_t>& tokens) {
+    const Token_t& tiger = tokens[0];  // Assume tiger is at index 0
+    Point_t current = tiger.location;
+
+    const int d[8][2] = {
+            {-1,  0}, {-1,  1}, {0,  1}, {1,  1},
+            { 1,  0}, { 1, -1}, {0, -1}, {-1, -1}
+    };
+
+    Move_t bestMove = {tiger, current};  // Default to no move
+    int minDistanceToClosestMan = INT_MAX;
+    bool foundValidMove = false;
+
+    for (int i = 0; i < 8; i++) {
+        Point_t next = {current.row + d[i][0], current.col + d[i][1]};
+
+        // 1. Check bounds
+        if (next.row < 0 || next.row >= GRID_ROW || next.col < 0 || next.col >= GRID_COL)
+            continue;
+
+        // 2. Must be connected via edge
+        if (hasEdgeBetween(current, next) == NONE)
+            continue;
+
+        // 3. Must be empty
+        if (!empty(next, tokens))
+            continue;
+
+        // 4. Find distance to nearest blue token
+        int closestDist = INT_MAX;
+        for (const auto& t : tokens) {
+            if (t.color == BLUE) {
+                int dist = abs(t.location.row - next.row) + abs(t.location.col - next.col);
+                if (dist < closestDist) {
+                    closestDist = dist;
+                }
+            }
+        }
+
+        // 5. Choose best move
+        if (closestDist < minDistanceToClosestMan) {
+            minDistanceToClosestMan = closestDist;
+            bestMove = {tiger, next};  // ✅ next is a Point_t
+            foundValidMove = true;
+        }
+    }
+
+    return foundValidMove ? bestMove : Move_t{tiger, current};  // fallback to current pos
+}
+
+
+int totalDistanceToAllMen(Point_t p, vector<Token_t> tokens) {
+    int dist = 0;
+    for(int i = 0; i < tokens.size(); i++) {
+        dist += distance(p, tokens[i].location);
+    }
+    return dist;
+}
+
+
 
 
 #endif //TIGERGAME_TIGERSNTURTLENECKS_H
