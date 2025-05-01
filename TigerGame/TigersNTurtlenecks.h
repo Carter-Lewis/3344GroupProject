@@ -138,15 +138,21 @@ double distance(Point_t p1, Point_t p2) {
     return sqrt(pow(p1.col - p2.col, 2) + pow(p1.row - p2.row, 2));
 }
 
+bool insideMainGrid(Point_t p) {
+    return (p.row < 4 || p.row > 12 || p.col > 8);
+}
+
 direction hasEdgeBetween(Point_t point1, Point_t point2) {
     int rowDiff = point1.row - point2.row;
     int colDiff = point1.col - point2.col;
 
     // Check 4 simple directions
-    if (rowDiff == -1 && colDiff ==  0) return N;
-    if (rowDiff ==  0 && colDiff ==  1) return E;
-    if (rowDiff ==  1 && colDiff ==  0) return S;
-    if (rowDiff ==  0 && colDiff == -1) return W;
+    if (insideMainGrid(point1) && insideMainGrid(point2)) {
+        if (rowDiff == -1 && colDiff ==  0) return N;
+        if (rowDiff ==  0 && colDiff ==  1) return E;
+        if (rowDiff ==  1 && colDiff ==  0) return S;
+        if (rowDiff ==  0 && colDiff == -1) return W;
+    }
 
     pair<Point, Point> edge = make_pair(Point(point1.row, point1.col),
                                             Point(point2.row, point2.col));
