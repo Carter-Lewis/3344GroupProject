@@ -6,8 +6,6 @@
 #define TIGERGAME_TIGERSNTURTLENECKS_H
 
 #include "constants.h"
-
-//TODO why is this here...?
 Token_t tiger;
 
 set<pair<Point, Point>> diagonalEdgeList() {
@@ -139,84 +137,64 @@ double distance(Point_t p1, Point_t p2) {
 }
 
 direction hasEdgeBetween(Point_t point1, Point_t point2) {
-    direction p1_direction_of_p2 = NONE;
+    int rowDiff = point2.row - point1.row;
+    int colDiff = point2.col - point1.col;
 
-    switch (point1.row - point2.row) {
-        case 1: p1_direction_of_p2 = E; break;
-        case -1: p1_direction_of_p2 = W; break;
-        default: break;
-    }
-    switch (point1.col - point2.col) {
-        case 1: p1_direction_of_p2 = S; break;
-        case -1: p1_direction_of_p2 = N; break;
-        default: break;
-    }
+    // Check all 8 directions
+    if (rowDiff == -1 && colDiff ==  0) return N;
+    if (rowDiff == -1 && colDiff ==  1) return NE;
+    if (rowDiff ==  0 && colDiff ==  1) return E;
+    if (rowDiff ==  1 && colDiff ==  1) return SE;
+    if (rowDiff ==  1 && colDiff ==  0) return S;
+    if (rowDiff ==  1 && colDiff == -1) return SW;
+    if (rowDiff ==  0 && colDiff == -1) return W;
+    if (rowDiff == -1 && colDiff == -1) return NW;
 
-    if (p1_direction_of_p2 == NONE) {
-        pair<Point, Point> edge = make_pair(Point(point1.row, point1.col),
-                                            Point(point2.row, point2.col));
-
-        for (pair<Point, Point> e: diagonalEdgeList()) {
-            if (e == edge) {
-                if (point1.row+1 == point2.row) {
-                    switch (point1.col - point2.col) {
-                        case 1: p1_direction_of_p2 = NE; break;
-                        case -1: p1_direction_of_p2 = NW; break;
-                        default: break;
-                    }
-                }
-                else if (point1.row-1 == point2.row) {
-                    switch (point1.col - point2.col) {
-                        case 1: p1_direction_of_p2 = SE; break;
-                        case -1: p1_direction_of_p2 = SW; break;
-                        default: break;
-                    }
-                }
-            }
-        }
-    }
-
-    return p1_direction_of_p2;
+    return NONE;
 }
 
 bool isJumpable(const vector<Token_t> &tokens, const Token_t t) {
-    bool result = true;
+    if(t.color != BLUE) return false;
 
-    direction tiger_direction_of_token = hasEdgeBetween(tokens[0].location, t.location);
-    Point_t location = t.location;
-    switch (tiger_direction_of_token) {
+    Point_t tigerLocation = tokens.at(0).location;
+    direction d = hasEdgeBetween(tigerLocation, t.location);
+    if(d == NONE) return false;
+
+    Point_t jumpPosition = t.location;
+
+    switch(d) {
         case N:
-            location.row += 1;
+            jumpPosition.row--;
             break;
         case NE:
-            location.row += 1;
-            location.col -= 1;
+            jumpPosition.row--;
+            jumpPosition.col++;
             break;
         case E:
-            location.col -= 1;
+            jumpPosition.col++;
             break;
         case SE:
-            location.row -= 1;
-            location.col -= 1;
+            jumpPosition.row++;
+            jumpPosition.col++;
             break;
         case S:
-            location.row -= 1;
+            jumpPosition.row++;
             break;
         case SW:
-            location.row -= 1;
-            location.col += 1;
+            jumpPosition.row++;
+            jumpPosition.col--;
             break;
         case W:
-            location.col += 1;
+            jumpPosition.col--;
             break;
         case NW:
-            location.row += 1;
-            location.col += 1;
+            jumpPosition.col--;
+            jumpPosition.row--;
             break;
-        default: break;
+        default:
+            return false;
     }
-
-    result = empty(location, tokens);
+    return empty(jumpPosition, tokens);
 }
 
 vector<Token_t> getJumpableMen(const vector<Token_t> &tokens) {
@@ -250,26 +228,56 @@ bool empty(Point_t p, vector<Token_t> tokens) {
 
 Move_t marchForward(vector<Token_t> tokens) {
     priority_queue<Token_t, vector<Token_t>, marchMenPriority> sortedMen;
-    for(Token_t i : tokens) {
-        if(i.color == BLUE) {
+    for (Token_t i : tokens) {
+        if (i.color == BLUE) {
             sortedMen.push(i);
         }
     }
 
-    while(!sortedMen.empty()) {
+    while (!sortedMen.empty()) {
         Token_t tmp = sortedMen.top();
         sortedMen.pop();
-        if(empty({tmp.location.row-1, tmp.location.col}, tokens)) {
-            return {tmp, {tmp.location.row-1, tmp.location.col}};
+
+        Point_t nextSpot = {tmp.location.row - 1, tmp.location.col};
+
+        // Check if the spot in front is empty
+        if (empty(nextSpot, tokens)) {
+            // Only march if no jump is available
+            bool march = true;
+            for (Token_t i : tokens) {
+                if (isJumpable(tokens, i)) {
+                    march = false;
+                    break;
+                }
+            }
+
+            if (march) {
+                return {tmp, nextSpot};
+            }
         }
     }
+
+    // No valid forward moves
+    return {tokens[1], tokens[1].location};  // fallback: return a no-op move
 }
+
 
 int horizontalDistanceToTiger(Token_t token, Token_t tiger) {
     return abs(token.location.col-tiger.location.col);
 }
 
+bool canBeJumped(Token_t man) {
+    bool ans = false;
+    Point p1(tiger.location.row, tiger.location.col);
+    Point p2(man.location.row, man.location.col);
+    Point mid = p1.midPoint(p2);
+}
+
 bool onDiagonalSquare(Token_t man) {
+
+}
+
+vector<Token_t> getJumpableMen(vector<Token_t> tokens) {
 
 }
 
@@ -284,12 +292,17 @@ vector<point> potentialJumpLocations() {
  * TODO fill in all Positive Diagonal coordinates
  * Positive meaning it would have a positive slope in xy plane
  */
-bool onPositiveDiagonal() {
-//    return tiger.location.row == 12 && tiger.location.col == 3
-//        &&
-//        &&
-//        &&
-//        &&;
+bool tigerOnPositiveDiagonal() {
+//    return tiger.location.row == 0 && tiger.location.col == 4
+//        || tiger.location.row == 1 && tiger.location.col == 3
+//        || tiger.location.row == 2 && tiger.location.col == 2
+//        || tiger.location.row == 2 && tiger.location.col == 6
+//        || tiger.location.row == 3 && tiger.location.col == 5
+//        || tiger.location.row == 4 && tiger.location.col == 4
+//        || tiger.location.row == 5 && tiger.location.col == 3
+//        || tiger.location.row == 6 && tiger.location.col == 2
+//        || tiger.location.row == 7 && tiger.location.col == 1
+//        || tiger.location.row == 8 && tiger.location.col == 0;
 }
 
 /*
