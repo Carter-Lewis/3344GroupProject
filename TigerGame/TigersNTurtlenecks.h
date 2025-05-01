@@ -139,7 +139,7 @@ Move_t Move_TigersNTurtlenecks (vector<Token_t> tokens, Color_t turn) {
             return tigerJump(tokens);
         }
         else {
-            moveTowardMostMen(tokens);
+            return moveTowardMostMen(tokens);
         }
     }
 
@@ -377,7 +377,7 @@ Move_t moveTowardMostMen(const vector<Token_t>& tokens) {
         }
     }
 
-    return foundValidMove ? bestMove : Move_t{tiger, current};  // fallback to no-op
+    return foundValidMove ? bestMove : moveTowardClosestMan(tokens);  // fallback to no-op
 }
 
 Move_t moveTowardClosestMan(const vector<Token_t>& tokens) {
