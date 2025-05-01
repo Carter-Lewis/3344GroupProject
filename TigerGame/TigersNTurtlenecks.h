@@ -147,7 +147,7 @@ Move_t Move_TigersNTurtlenecks (vector<Token_t> tokens, Color_t turn) {
 }
 
 double distance(Point_t p1, Point_t p2) {
-    return sqrt(pow(p1.col - p2.col, 2) + pow(p1.row - p2.row, 2));
+    return abs(p1.row-p2.row) + abs(p1.col-p2.col);
 }
 
 direction hasEdgeBetween(Point_t point1, Point_t point2) {
@@ -155,17 +155,21 @@ direction hasEdgeBetween(Point_t point1, Point_t point2) {
     int colDiff = point2.col - point1.col;
 
     // Check all 8 directions
-    if(point1.row < 4) {
+    if(point2.row < 4) {
         if(rowDiff == 0 || colDiff == 0) return NONE;
+        if(rowDiff == -1 && colDiff ==  1 && (point1.row + point1.col == 4 || point1.row + point1.col == 6  || point1.row + point1.col == 8)) return NE;
+        if (rowDiff ==  1 && colDiff == -1 && (point1.row + point1.col == 4 || point1.row + point1.col == 6 || point1.row + point1.col == 8)) return SW;
+        if (rowDiff == -1 && colDiff == -1 && (point1.row - point1.col == 4 || point1.row - point1.col == 2 || point1.row - point1.col == 0)) return NW;
+        if (rowDiff ==  1 && colDiff ==  1 && (point1.row - point1.col == 4 || point1.row - point1.col == 2 || point1.row - point1.col == 0)) return SE;
     }
     if (rowDiff == -1 && colDiff ==  0) return N;
-    if (rowDiff == -1 && colDiff ==  1) return NE;
+    if (rowDiff == -1 && colDiff ==  1 && (point1.row + point1.col == 16 || point1.row + point1.col == 8)) return NE;
     if (rowDiff ==  0 && colDiff ==  1) return E;
-    if (rowDiff ==  1 && colDiff ==  1) return SE;
+    if (rowDiff ==  1 && colDiff ==  1 && (point1.row - point1.col == 8 || point1.row - point1.col == 0)) return SE;
     if (rowDiff ==  1 && colDiff ==  0) return S;
-    if (rowDiff ==  1 && colDiff == -1) return SW;
+    if (rowDiff ==  1 && colDiff == -1 && (point1.row + point1.col == 16 || point1.row + point1.col == 8)) return SW;
     if (rowDiff ==  0 && colDiff == -1) return W;
-    if (rowDiff == -1 && colDiff == -1) return NW;
+    if (rowDiff == -1 && colDiff == -1 && (point1.row - point1.col == 8 || point1.row - point1.col == 0)) return NW;
 
     return NONE;
 }
@@ -427,7 +431,7 @@ Move_t moveTowardClosestMan(const vector<Token_t>& tokens) {
         }
     }
 
-    return foundValidMove ? bestMove : Move_t{tiger, current};  // fallback to current pos
+    return foundValidMove ? bestMove : Move_t{tiger, {current.row+1, current.col}};  // fallback to current pos
 }
 
 
