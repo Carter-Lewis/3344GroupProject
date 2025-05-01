@@ -214,6 +214,27 @@ vector<Token_t> getJumpableMen(const vector<Token_t> &tokens) {
     return jumpableMen;
 }
 
+bool isEndagered(const vector<Token_t> &tokens, const Token_t t) {
+    bool result = true;
+
+    //TODO figure this out
+
+
+    return result;
+}
+
+
+vector<Token_t> getEndageredMen(const vector<Token_t> &tokens) {
+    vector<Token_t> endagered;
+    for (Token_t t : tokens) {
+        if (isEndagered(tokens, t)) {
+            endagered.push_back(t);
+        }
+    }
+
+    return endagered;
+}
+
 bool menAboveAttackLine (vector<Token_t> tokens) {
     for(Token_t i: tokens) {
         if(i.color==BLUE&&i.location.row > 6) return false;
