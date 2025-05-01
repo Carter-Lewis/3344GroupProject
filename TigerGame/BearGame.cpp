@@ -175,7 +175,6 @@ int main() {
                 game.reset(g);
                 count = 0;
             }
-
         }
 
         count++;
@@ -199,7 +198,7 @@ int main() {
             game.reset(g);
         }
 
-        g.Sleep(1000);
+        g.Sleep(250);
     }
     return 0;
 }
