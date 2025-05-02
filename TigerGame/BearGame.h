@@ -900,7 +900,7 @@ public:
             p2.x = p1.x + (m-rand()%n);
             p2.y = p1.y + (m-rand()%n);
 
-            cout << p1 << p2 << endl;
+//            cout << p1 << p2 << endl;
         }while(!legalMove(p1,p2));
         updateTokenLocation(p1,p2, g);
     }

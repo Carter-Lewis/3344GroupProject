@@ -85,6 +85,15 @@ int main() {
 
 
         if(game.legalMove(p1,p2)){
+            if(TESTING2) {
+                if(game.getTurn() == TIGER) {
+                    cout << "RED - ";
+                }
+                else {
+                    cout << "BLUE - ";
+                }
+                cout << "Generated Valid Move" << endl;
+            }
             game.updateTokenLocation(p1,p2, g);
         }
         else{
@@ -166,7 +175,6 @@ int main() {
                 game.reset(g);
                 count = 0;
             }
-
         }
 
         count++;
@@ -190,7 +198,7 @@ int main() {
             game.reset(g);
         }
 
-        g.Sleep(100);
+        g.Sleep(750);
     }
     return 0;
 }
