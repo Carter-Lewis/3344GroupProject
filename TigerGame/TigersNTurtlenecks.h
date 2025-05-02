@@ -6,11 +6,80 @@
 #define TIGERGAME_TIGERSNTURTLENECKS_H
 
 #include "constants.h"
-
 using namespace std;
-
 static Token_t tiger;
 
+set<pair<Point, Point>> diagonalEdgeList() {
+    set<pair<Point, Point>> edges;
+    edges.insert(make_pair(Point(0, 4), Point(1, 3)));
+    edges.insert(make_pair(Point(1, 3), Point(0, 4)));
+    edges.insert(make_pair(Point(0, 4), Point(1, 5)));
+    edges.insert(make_pair(Point(1, 5), Point(0, 4)));
+    edges.insert(make_pair(Point(1, 3), Point(2, 2)));
+    edges.insert(make_pair(Point(2, 2), Point(1, 3)));
+    edges.insert(make_pair(Point(2, 2), Point(3, 3)));
+    edges.insert(make_pair(Point(3, 3), Point(2, 2)));
+    edges.insert(make_pair(Point(1, 3), Point(2, 4)));
+    edges.insert(make_pair(Point(2, 4), Point(1, 3)));
+    edges.insert(make_pair(Point(2, 4), Point(3, 3)));
+    edges.insert(make_pair(Point(3, 3), Point(2, 4)));
+    edges.insert(make_pair(Point(1, 5), Point(2, 4)));
+    edges.insert(make_pair(Point(2, 4), Point(1, 5)));
+    edges.insert(make_pair(Point(1, 5), Point(2, 6)));
+    edges.insert(make_pair(Point(2, 6), Point(1, 5)));
+    edges.insert(make_pair(Point(2, 4), Point(3, 5)));
+    edges.insert(make_pair(Point(3, 5), Point(2, 4)));
+    edges.insert(make_pair(Point(2, 6), Point(3, 5)));
+    edges.insert(make_pair(Point(3, 5), Point(2, 6)));
+    edges.insert(make_pair(Point(3, 3), Point(4, 4)));
+    edges.insert(make_pair(Point(4, 4), Point(3, 3)));
+    edges.insert(make_pair(Point(3, 5), Point(4, 4)));
+    edges.insert(make_pair(Point(4, 4), Point(3, 5)));
+
+    edges.insert(make_pair(Point(4, 4), Point(5, 3)));
+    edges.insert(make_pair(Point(5, 3), Point(4, 4)));
+
+    edges.insert(make_pair(Point(5, 3), Point(6, 2)));
+    edges.insert(make_pair(Point(6, 2), Point(5, 3)));
+
+    edges.insert(make_pair(Point(6, 2), Point(7, 1)));
+    edges.insert(make_pair(Point(7, 1), Point(6, 2)));
+
+    edges.insert(make_pair(Point(7, 1), Point(8, 0)));
+    edges.insert(make_pair(Point(8, 0), Point(7, 1)));
+
+    edges.insert(make_pair(Point(8, 0), Point(9, 1)));
+    edges.insert(make_pair(Point(9, 1), Point(8, 0)));
+
+    edges.insert(make_pair(Point(9, 1), Point(10, 2)));
+    edges.insert(make_pair(Point(10, 2), Point(9, 1)));
+
+    edges.insert(make_pair(Point(12, 4), Point(11, 5)));
+    edges.insert(make_pair(Point(11, 5), Point(12, 4)));
+
+    edges.insert(make_pair(Point(11, 5), Point(10, 6)));
+    edges.insert(make_pair(Point(10, 6), Point(11, 5)));
+
+    edges.insert(make_pair(Point(10, 6), Point(9, 7)));
+    edges.insert(make_pair(Point(9, 7), Point(10, 6)));
+
+    edges.insert(make_pair(Point(9, 7), Point(8, 8)));
+    edges.insert(make_pair(Point(8, 8), Point(9, 7)));
+
+    edges.insert(make_pair(Point(8, 8), Point(7, 7)));
+    edges.insert(make_pair(Point(7, 7), Point(8, 8)));
+
+    edges.insert(make_pair(Point(7, 7), Point(6, 6)));
+    edges.insert(make_pair(Point(6, 6), Point(7, 7)));
+
+    edges.insert(make_pair(Point(6, 6), Point(5, 5)));
+    edges.insert(make_pair(Point(5, 5), Point(6, 6)));
+
+    edges.insert(make_pair(Point(5, 5), Point(4, 4)));
+    edges.insert(make_pair(Point(4, 4), Point(5, 5)));
+
+    return edges;
+}
 enum direction{ NONE,N,NE,E,SE,S,SW,W,NW };
 
 Move_t Move_TigersNTurtlenecks (vector<Token_t> tokens, Color_t turn);
@@ -35,11 +104,9 @@ Move_t moveTowardMostMen(const vector<Token_t>& tokens);
 Move_t tigerJump(vector<Token_t> tokens);
 Move_t moveTowardClosestMan(const vector<Token_t>& tokens);
 int totalDistanceToAllMen(Point_t p, vector<Token_t> tokens);
-Move_t getForkMove (vector<Token_t> tokens);
 
 //TODO: following functions not done yet
 bool onDiagonalSquare(Token_t man);
-
 vector<Point_t> potentialJumpLocations();
 bool onPositiveDiagonal();
 bool onNegativeDiagonal();
@@ -59,6 +126,10 @@ Move_t Move_TigersNTurtlenecks (vector<Token_t> tokens, Color_t turn) {
         if(!jumpable.empty()) {
             return moveJumpableMan(jumpable, tokens);
         }
+        // if (!endangered.empty()) {
+        //     like is jumpable but more lenient...
+        //     not sure if we need it
+        // }
         if (menAboveAttackLine(tokens)) {
             //move things inward on the sides
         }
@@ -89,16 +160,29 @@ Move_t moveJumpableMan(vector<Token_t> jumpable, vector<Token_t> tokens) {
     Point_t dest = tokenInDanger.location;
 
     for (int i = 0; i < tokens.size(); i++) {
-        Token_t j = tokens.at(i);
-        if (tokenInDanger.location.row != j.location.row && tokenInDanger.location.col != j.location.col) {
-            direction d = hasEdgeBetween(emptyPoint, j.location);
+        Token_t tmp = tokens.at(i);
+        if (tokenInDanger.location.row != tmp.location.row && tokenInDanger.location.col != tmp.location.col) {
+            direction d = hasEdgeBetween(emptyPoint, tmp.location);
             if (d != NONE) {
-                movedToken.color = j.color;
-                movedToken.location = j.location;
+                movedToken.color = tmp.color;
+                movedToken.location = tmp.location;
 
-                dest = j.location;
+                dest = tmp.location;
 
                 switch(d) {
+                    case S:
+                        dest.row--;
+                        break;
+
+                    case SE:
+                        dest.row--;
+                        dest.col--;
+                        break;
+                    case SW:
+                        dest.row--;
+                        dest.col++;
+                        break;
+
                     case N:
                         dest.row++;
                         break;
@@ -106,31 +190,19 @@ Move_t moveJumpableMan(vector<Token_t> jumpable, vector<Token_t> tokens) {
                         dest.row++;
                         dest.col--;
                         break;
-                    case E:
-                        dest.col--;
-                        break;
-                    case SE:
-                        dest.row--;
-                        dest.col--;
-                        break;
-                    case S:
-                        dest.row--;
-                        break;
-                    case SW:
-                        dest.row--;
-                        dest.col++;
-                        break;
-                    case W:
-                        dest.col++;
-                        break;
                     case NW:
                         dest.col++;
                         dest.row++;
                         break;
-                    case NONE:
+
+                    case E:
+                        dest.col--;
+                        break;
+                    case W:
+                        dest.col++;
                         break;
                 }
-//                break;
+                break;
             }
         }
     }
@@ -139,6 +211,19 @@ Move_t moveJumpableMan(vector<Token_t> jumpable, vector<Token_t> tokens) {
         switch(hasEdgeBetween(emptyPoint, tokenInDanger.location)) {
             case NONE:
                 break;
+            case S:
+                dest.row--;
+                break;
+
+            case SE:
+                dest.row--;
+                dest.col--;
+                break;
+            case SW:
+                dest.row--;
+                dest.col++;
+                break;
+
             case N:
                 dest.row++;
                 break;
@@ -146,26 +231,16 @@ Move_t moveJumpableMan(vector<Token_t> jumpable, vector<Token_t> tokens) {
                 dest.row++;
                 dest.col--;
                 break;
-            case E:
-                dest.col--;
-                break;
-            case SE:
-                dest.row--;
-                dest.col--;
-                break;
-            case S:
-                dest.row--;
-                break;
-            case SW:
-                dest.row--;
-                dest.col++;
-                break;
-            case W:
-                dest.col++;
-                break;
             case NW:
                 dest.col++;
                 dest.row++;
+                break;
+
+            case E:
+                dest.col--;
+                break;
+            case W:
+                dest.col++;
                 break;
         }
     }
@@ -278,7 +353,6 @@ bool isEndagered(const vector<Token_t> &tokens, const Token_t t) {
 
     return result;
 }
-
 
 vector<Token_t> getEndageredMen(const vector<Token_t> &tokens) {
     vector<Token_t> endagered;
@@ -447,15 +521,19 @@ Move_t moveTowardMostMen(const vector<Token_t>& tokens) {
     for (int i = 0; i < 8; i++) {
         Point_t next = {current.row + d[i][0], current.col + d[i][1]};
 
+        // Must be within bounds
         if (next.row < 0 || next.row > GRID_ROW || next.col < 0 || next.col > GRID_COL)
             continue;
 
+        // Must be a legal board edge
         if (hasEdgeBetween(current, next) == NONE)
             continue;
 
+        // Must be empty
         if (!empty(next, tokens))
             continue;
 
+        // Calculate total distance from 'next' to all blue tokens
         int totalDistance = totalDistanceToAllMen(next, tokens);
 
         if (totalDistance < minTotalDistance) {
@@ -484,16 +562,19 @@ Move_t moveTowardClosestMan(const vector<Token_t>& tokens) {
     for (int i = 0; i < 8; i++) {
         Point_t next = {current.row + d[i][0], current.col + d[i][1]};
 
+        // 1. Check bounds
         if (next.row < 0 || next.row >= GRID_ROW || next.col < 0 || next.col >= GRID_COL)
             continue;
 
+        // 2. Must be connected via edge
         if (hasEdgeBetween(current, next) == NONE)
             continue;
 
-
+        // 3. Must be empty
         if (!empty(next, tokens))
             continue;
 
+        // 4. Find distance to nearest blue token
         int closestDist = INT_MAX;
         for (int i = 0; i < tokens.size(); i++) {
             Token_t t = tokens.at(i);
@@ -505,6 +586,7 @@ Move_t moveTowardClosestMan(const vector<Token_t>& tokens) {
             }
         }
 
+        // 5. Choose best move
         if (closestDist < minDistanceToClosestMan) {
             minDistanceToClosestMan = closestDist;
             bestMove = {tiger, next};
