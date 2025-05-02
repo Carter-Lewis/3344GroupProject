@@ -6,6 +6,8 @@
 #define TIGERGAME_TIGERSNTURTLENECKS_H
 
 #include "constants.h"
+#include "Point.h"
+#include <set>
 Token_t tiger;
 
 set<pair<Point, Point>> diagonalEdgeList() {
@@ -111,7 +113,7 @@ int totalDistanceToAllMen(Point_t p, vector<Token_t> tokens);
 //TODO: following functions not done yet
 bool onDiagonalSquare(Token_t man);
 vector<Move_t> getForkMoves (vector<Token_t> tokens);
-vector<point> potentialJumpLocations();
+vector<Point> potentialJumpLocations();
 bool onPositiveDiagonal();
 bool onNegativeDiagonal();
 
@@ -195,6 +197,8 @@ Move_t moveJumpableMan(vector<Token_t> jumpable, vector<Token_t> tokens) {
                     case NW:
                         dest.col++;
                         dest.row++;
+                        break;
+                    case NONE:
                         break;
                 }
             }
@@ -408,17 +412,17 @@ int horizontalDistanceToTiger(Token_t token, Token_t tiger) {
     return abs(token.location.col-tiger.location.col);
 }
 
-bool onDiagonalSquare(Token_t man) {
-
-}
-
-vector<Move_t> getForkMoves (vector<Token_t> tokens) {
-
-}
-
-vector<point> potentialJumpLocations() {
-
-}
+// bool onDiagonalSquare(Token_t man) {
+//
+// }
+//
+// vector<Move_t> getForkMoves (vector<Token_t> tokens) {
+//
+// }
+//
+// vector<Point> potentialJumpLocations() {
+//
+// }
 
 Move_t tigerJump(vector<Token_t> tokens) {
     vector<Token_t> jumpableMen = getJumpableMen(tokens);
@@ -439,13 +443,15 @@ Move_t tigerJump(vector<Token_t> tokens) {
             return {tiger, {tiger.location.row, tiger.location.col-2}};
         case NW:
             return {tiger, {tiger.location.row-2, tiger.location.col-2}};
+        case NONE:
+            return {tiger, {tiger.location.row, tiger.location.col}};
     }
 }
 /*
  * TODO fill in all Positive Diagonal coordinates
  * Positive meaning it would have a positive slope in xy plane
  */
-bool tigerOnPositiveDiagonal() {
+// bool tigerOnPositiveDiagonal() {
 //    return tiger.location.row == 0 && tiger.location.col == 4
 //        || tiger.location.row == 1 && tiger.location.col == 3
 //        || tiger.location.row == 2 && tiger.location.col == 2
@@ -456,14 +462,14 @@ bool tigerOnPositiveDiagonal() {
 //        || tiger.location.row == 6 && tiger.location.col == 2
 //        || tiger.location.row == 7 && tiger.location.col == 1
 //        || tiger.location.row == 8 && tiger.location.col == 0;
-}
+//}
 
 /*
  * TODO do the same for negative diagonals
  */
-bool onNegativeDiagonal() {
-
-}
+// bool onNegativeDiagonal() {
+//
+// }
 
 Move_t moveTowardMostMen(const vector<Token_t>& tokens) {
     Token_t tiger = tokens[0];
