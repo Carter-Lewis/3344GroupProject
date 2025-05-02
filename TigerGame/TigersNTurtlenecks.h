@@ -98,6 +98,8 @@ bool menAboveAttackLine (vector<Token_t> tokens);
 Move_t marchForward(Token_t token);
 Move_t marchForward(vector<Token_t> tokens);
 int horizontalDistanceToTiger(Token_t token, Token_t tiger);
+Move_t moveJumpableMan(vector<Token_t> jumpable, vector<Token_t> tokens);
+Point_t findPotentialJumpLoc(Point_t tigerLocation, Point_t p);
 
 //Tiger Functions
 vector<Token_t> getJumpableMen(const vector<Token_t>& tokens);
@@ -109,7 +111,7 @@ int totalDistanceToAllMen(Point_t p, vector<Token_t> tokens);
 //TODO: following functions not done yet
 bool onDiagonalSquare(Token_t man);
 vector<Move_t> getForkMoves (vector<Token_t> tokens);
-vector<point> potentialJumpLocations();
+vector<Point> potentialJumpLocations();
 bool onPositiveDiagonal();
 bool onNegativeDiagonal();
 
@@ -125,14 +127,16 @@ Move_t Move_TigersNTurtlenecks (vector<Token_t> tokens, Color_t turn) {
 
     tiger = tokens.at(0);
     if(turn == BLUE) {
-        bool marchingForward = !menAboveAttackLine(tokens);
-        if(marchingForward) {
-            return marchForward(tokens);
+        vector<Token_t> jumpable = getJumpableMen(tokens);
+        if(!jumpable.empty()) {
+            return moveJumpableMan(jumpable, tokens);
         }
-        else {
-
+        if (menAboveAttackLine(tokens)) {
+            //move things inward on the sides
         }
+        return marchForward(tokens);
     }
+
     //Tiger algorithm
     else {
         if(getJumpableMen(tokens).size() > 0) {
@@ -146,8 +150,103 @@ Move_t Move_TigersNTurtlenecks (vector<Token_t> tokens, Color_t turn) {
     return {tokens[1], {5,5}};
 }
 
+Move_t moveJumpableMan(vector<Token_t> jumpable, vector<Token_t> tokens) {
+    Token_t tokenInDanger = jumpable.front();
+    Point_t emptyPoint = findPotentialJumpLoc(tokens[0].location, tokenInDanger.location);
+
+    Token_t movedToken;
+    Point_t dest = tokenInDanger.location;
+
+    for (int i = 0; i < tokens.size(); i++) {
+        Token_t j = tokens.at(i);
+        if (tokenInDanger.location.row != j.location.row && tokenInDanger.location.col != j.location.col) {
+            direction d = hasEdgeBetween(emptyPoint, j.location);
+            if (d != NONE) {
+                movedToken.color = j.color;
+                movedToken.location = j.location;
+
+                dest = j.location;
+
+                switch(d) {
+                    case N:
+                        dest.row++;
+                        break;
+                    case NE:
+                        dest.row++;
+                        dest.col--;
+                        break;
+                    case E:
+                        dest.col--;
+                        break;
+                    case SE:
+                        dest.row--;
+                        dest.col--;
+                        break;
+                    case S:
+                        dest.row--;
+                        break;
+                    case SW:
+                        dest.row--;
+                        dest.col++;
+                        break;
+                    case W:
+                        dest.col++;
+                        break;
+                    case NW:
+                        dest.col++;
+                        dest.row++;
+                        break;
+                    case NONE:
+                        break;
+                }
+            }
+        }
+    }
+
+    if (dest == tokenInDanger.location) {
+        switch(hasEdgeBetween(emptyPoint, tokenInDanger.location)) {
+            case NONE:
+                break;
+            case N:
+                dest.row++;
+                break;
+            case NE:
+                dest.row++;
+                dest.col--;
+                break;
+            case E:
+                dest.col--;
+                break;
+            case SE:
+                dest.row--;
+                dest.col--;
+                break;
+            case S:
+                dest.row--;
+                break;
+            case SW:
+                dest.row--;
+                dest.col++;
+                break;
+            case W:
+                dest.col++;
+                break;
+            case NW:
+                dest.col++;
+                dest.row++;
+                break;
+        }
+    }
+
+    return {movedToken, dest};
+}
+
 double distance(Point_t p1, Point_t p2) {
     return abs(p1.row-p2.row) + abs(p1.col-p2.col);
+}
+
+bool insideMainGrid(Point_t p) {
+    return (p.row < 4 || p.row > 12 || p.col > 8);
 }
 
 direction hasEdgeBetween(Point_t point1, Point_t point2) {
@@ -157,10 +256,14 @@ direction hasEdgeBetween(Point_t point1, Point_t point2) {
     // Check all 8 directions
     if(point2.row < 4) {
         if(rowDiff == 0 || colDiff == 0) return NONE;
-        if(rowDiff == -1 && colDiff ==  1 && (point1.row + point1.col == 4 || point1.row + point1.col == 6  || point1.row + point1.col == 8)) return NE;
-        if (rowDiff ==  1 && colDiff == -1 && (point1.row + point1.col == 4 || point1.row + point1.col == 6 || point1.row + point1.col == 8)) return SW;
-        if (rowDiff == -1 && colDiff == -1 && (point1.row - point1.col == 4 || point1.row - point1.col == 2 || point1.row - point1.col == 0)) return NW;
-        if (rowDiff ==  1 && colDiff ==  1 && (point1.row - point1.col == 4 || point1.row - point1.col == 2 || point1.row - point1.col == 0)) return SE;
+        if(rowDiff == -1 && colDiff ==  1 && (point1.row + point1.col == 4
+            || point1.row + point1.col == 6  || point1.row + point1.col == 8)) return NE;
+        if (rowDiff ==  1 && colDiff == -1 && (point1.row + point1.col == 4
+            || point1.row + point1.col == 6 || point1.row + point1.col == 8)) return SW;
+        if (rowDiff == -1 && colDiff == -1 && (point1.row - point1.col == 4
+            || point1.row - point1.col == 2 || point1.row - point1.col == 0)) return NW;
+        if (rowDiff ==  1 && colDiff ==  1 && (point1.row - point1.col == 4
+            || point1.row - point1.col == 2 || point1.row - point1.col == 0)) return SE;
     }
     if (rowDiff == -1 && colDiff ==  0) return N;
     if (rowDiff == -1 && colDiff ==  1 && (point1.row + point1.col == 16 || point1.row + point1.col == 8)) return NE;
@@ -174,63 +277,93 @@ direction hasEdgeBetween(Point_t point1, Point_t point2) {
     return NONE;
 }
 
+Point_t findPotentialJumpLoc(Point_t tigerLocation, Point_t p) {
+    direction d = hasEdgeBetween(tigerLocation, p);
+
+    switch(d) {
+        case N:
+            p.row--;
+            break;
+        case NE:
+            p.row--;
+            p.col++;
+            break;
+        case E:
+            p.col++;
+            break;
+        case SE:
+            p.row++;
+            p.col++;
+            break;
+        case S:
+            p.row++;
+            break;
+        case SW:
+            p.row++;
+            p.col--;
+            break;
+        case W:
+            p.col--;
+            break;
+        case NW:
+            p.col--;
+            p.row--;
+            break;
+        default:
+            p.col = -1;
+            p.row = -1;
+            break;
+    }
+
+    return p;
+}
+
 bool isJumpable(const vector<Token_t> &tokens, const Token_t t) {
     if(t.color != BLUE) return false;
 
     Point_t tigerLocation = tokens.at(0).location;
-    direction d = hasEdgeBetween(tigerLocation, t.location);
-    if(d == NONE) return false;
+    Point_t jumpPosition = findPotentialJumpLoc(tigerLocation, t.location);
 
-    Point_t jumpPosition = t.location;
-
-    switch(d) {
-        case N:
-            jumpPosition.row--;
-            break;
-        case NE:
-            jumpPosition.row--;
-            jumpPosition.col++;
-            break;
-        case E:
-            jumpPosition.col++;
-            break;
-        case SE:
-            jumpPosition.row++;
-            jumpPosition.col++;
-            break;
-        case S:
-            jumpPosition.row++;
-            break;
-        case SW:
-            jumpPosition.row++;
-            jumpPosition.col--;
-            break;
-        case W:
-            jumpPosition.col--;
-            break;
-        case NW:
-            jumpPosition.col--;
-            jumpPosition.row--;
-            break;
-        default:
-            return false;
-    }
+    if (jumpPosition.row == -1 || jumpPosition.col == -1) return false;
     return empty(jumpPosition, tokens);
 }
 
 vector<Token_t> getJumpableMen(const vector<Token_t> &tokens) {
     vector<Token_t> jumpableMen;
-    for (Token_t t : tokens) {
-        if (isJumpable(tokens, t)) {
-            jumpableMen.push_back(t);
+    for (int i = 0; i < tokens.size(); i++) {
+        if (isJumpable(tokens, tokens.at(i))) {
+            jumpableMen.push_back(tokens.at(i));
         }
     }
     return jumpableMen;
 }
 
+bool isEndagered(const vector<Token_t> &tokens, const Token_t t) {
+    bool result = true;
+
+    //TODO figure this out
+
+
+    return result;
+}
+
+
+vector<Token_t> getEndageredMen(const vector<Token_t> &tokens) {
+    vector<Token_t> endagered;
+    for (int i = 0; i < tokens.size(); i++) {
+        if (isEndagered(tokens, tokens.at(0))) {
+            endagered.push_back(tokens.at(0));
+        }
+    }
+
+    return endagered;
+}
+
 bool menAboveAttackLine (vector<Token_t> tokens) {
-    for(Token_t i: tokens) {
-        if(i.color==BLUE&&i.location.row > 6) return false;
+    for (int i = 0; i < tokens.size(); i++) {
+        if (tokens.at(i).color == BLUE && tokens.at(i).location.row > 6) {
+            return false;
+        }
     }
     return true;
 }
@@ -240,8 +373,10 @@ Move_t marchForward(Token_t token) {
 }
 
 bool empty(Point_t p, vector<Token_t> tokens) {
-    for(Token_t i: tokens) {
-        if(i.location == p) return false;
+    for (int i = 0; i < tokens.size(); i++) {
+        if(tokens.at(i).location == p) {
+            return false;
+        }
     }
     return true;
 }
@@ -265,9 +400,9 @@ bool isNextMoveJumpable(vector<Token_t> tokens, Point_t nextLocation) {
 
 Move_t marchForward(vector<Token_t> tokens) {
     priority_queue<Token_t, vector<Token_t>, marchMenPriority> sortedMen;
-    for (Token_t i : tokens) {
-        if (i.color == BLUE) {
-            sortedMen.push(i);
+    for (int i = 0; i < tokens.size(); i++) {
+        if (tokens.at(i).color == BLUE) {
+            sortedMen.push(tokens.at(i));
         }
     }
 
@@ -295,17 +430,17 @@ int horizontalDistanceToTiger(Token_t token, Token_t tiger) {
     return abs(token.location.col-tiger.location.col);
 }
 
-bool onDiagonalSquare(Token_t man) {
-
-}
-
-vector<Move_t> getForkMoves (vector<Token_t> tokens) {
-
-}
-
-vector<point> potentialJumpLocations() {
-
-}
+// bool onDiagonalSquare(Token_t man) {
+//
+// }
+//
+// vector<Move_t> getForkMoves (vector<Token_t> tokens) {
+//
+// }
+//
+// vector<Point> potentialJumpLocations() {
+//
+// }
 
 Move_t tigerJump(vector<Token_t> tokens) {
     vector<Token_t> jumpableMen = getJumpableMen(tokens);
@@ -326,13 +461,15 @@ Move_t tigerJump(vector<Token_t> tokens) {
             return {tiger, {tiger.location.row, tiger.location.col-2}};
         case NW:
             return {tiger, {tiger.location.row-2, tiger.location.col-2}};
+        case NONE:
+            return {tiger, {tiger.location.row, tiger.location.col}};
     }
 }
 /*
  * TODO fill in all Positive Diagonal coordinates
  * Positive meaning it would have a positive slope in xy plane
  */
-bool tigerOnPositiveDiagonal() {
+// bool tigerOnPositiveDiagonal() {
 //    return tiger.location.row == 0 && tiger.location.col == 4
 //        || tiger.location.row == 1 && tiger.location.col == 3
 //        || tiger.location.row == 2 && tiger.location.col == 2
@@ -343,14 +480,14 @@ bool tigerOnPositiveDiagonal() {
 //        || tiger.location.row == 6 && tiger.location.col == 2
 //        || tiger.location.row == 7 && tiger.location.col == 1
 //        || tiger.location.row == 8 && tiger.location.col == 0;
-}
+//}
 
 /*
  * TODO do the same for negative diagonals
  */
-bool onNegativeDiagonal() {
-
-}
+// bool onNegativeDiagonal() {
+//
+// }
 
 Move_t moveTowardMostMen(const vector<Token_t>& tokens) {
     Token_t tiger = tokens[0];
@@ -423,7 +560,8 @@ Move_t moveTowardClosestMan(const vector<Token_t>& tokens) {
 
         // 4. Find distance to nearest blue token
         int closestDist = INT_MAX;
-        for (const auto& t : tokens) {
+        for (int i = 0; i < tokens.size(); i++) {
+            Token_t t = tokens.at(i);
             if (t.color == BLUE) {
                 int dist = abs(t.location.row - next.row) + abs(t.location.col - next.col);
                 if (dist < closestDist) {
@@ -451,8 +589,6 @@ int totalDistanceToAllMen(Point_t p, vector<Token_t> tokens) {
     }
     return dist;
 }
-
-
 
 
 #endif //TIGERGAME_TIGERSNTURTLENECKS_H
