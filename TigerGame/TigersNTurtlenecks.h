@@ -246,6 +246,23 @@ bool empty(Point_t p, vector<Token_t> tokens) {
     return true;
 }
 
+bool isNextMoveJumpable(vector<Token_t> tokens, Point_t nextLocation) {
+    for (int i = 0; i < tokens.size(); i++) {
+        if (tokens.at(i).location == nextLocation) {
+            tokens.at(i).location.row--;
+            break;
+        }
+    }
+
+    for (Token_t t : tokens) {
+        if (isJumpable(tokens, t)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 Move_t marchForward(vector<Token_t> tokens) {
     priority_queue<Token_t, vector<Token_t>, marchMenPriority> sortedMen;
     for (Token_t i : tokens) {
@@ -260,31 +277,10 @@ Move_t marchForward(vector<Token_t> tokens) {
 
         Point_t nextSpot = {tmp.location.row - 1, tmp.location.col};
 
-
-
         // Check if the spot in front is empty
         if (empty(nextSpot, tokens)) {
-            // Only march if no jump is available
-            bool march = true;
-
-            int i = 0;
-            for (i; i < tokens.size(); i++) {
-                if (tokens.at(i).location == tmp.location) {
-                    tokens.at(i).location.row--;
-                    break;
-                }
-            }
-
-            for (Token_t t : tokens) {
-                if (isJumpable(tokens, t)) {
-                    march = false;
-                    break;
-                }
-            }
-
-            tokens.at(i).location.row++;
-
-            if (march) {
+            // Only march if no jump is creaetd
+            if (isNextMoveJumpable(tokens, nextSpot)) {
                 return {tmp, nextSpot};
             }
         }
