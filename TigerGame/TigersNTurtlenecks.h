@@ -260,16 +260,29 @@ Move_t marchForward(vector<Token_t> tokens) {
 
         Point_t nextSpot = {tmp.location.row - 1, tmp.location.col};
 
+
+
         // Check if the spot in front is empty
         if (empty(nextSpot, tokens)) {
             // Only march if no jump is available
             bool march = true;
-            for (Token_t i : tokens) {
-                if (isJumpable(tokens, i)) {
+
+            int i = 0;
+            for (i; i < tokens.size(); i++) {
+                if (tokens.at(i).location == tmp.location) {
+                    tokens.at(i).location.row--;
+                    break;
+                }
+            }
+
+            for (Token_t t : tokens) {
+                if (isJumpable(tokens, t)) {
                     march = false;
                     break;
                 }
             }
+
+            tokens.at(i).location.row++;
 
             if (march) {
                 return {tmp, nextSpot};
