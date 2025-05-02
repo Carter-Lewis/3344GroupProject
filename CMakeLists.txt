@@ -21,7 +21,6 @@ add_executable(3344GroupProject
         TigerGame/Team.h
         TigerGame/TigersNTurtlenecks.h
         TigerGame/Token.h
-        TigerGame/testing.cpp
 )
 
 # Find and link SDL2

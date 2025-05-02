@@ -6,85 +6,11 @@
 #define TIGERGAME_TIGERSNTURTLENECKS_H
 
 #include "constants.h"
-Token_t tiger;
 
-set<pair<Point, Point>> diagonalEdgeList() {
-    set<pair<Point, Point>> edges;
-    edges.insert(make_pair(Point(0, 4), Point(1, 3)));
-    edges.insert(make_pair(Point(1, 3), Point(0, 4)));
-    edges.insert(make_pair(Point(0, 4), Point(1, 5)));
-    edges.insert(make_pair(Point(1, 5), Point(0, 4)));
-    edges.insert(make_pair(Point(1, 3), Point(2, 2)));
-    edges.insert(make_pair(Point(2, 2), Point(1, 3)));
-    edges.insert(make_pair(Point(2, 2), Point(3, 3)));
-    edges.insert(make_pair(Point(3, 3), Point(2, 2)));
-    edges.insert(make_pair(Point(1, 3), Point(2, 4)));
-    edges.insert(make_pair(Point(2, 4), Point(1, 3)));
-    edges.insert(make_pair(Point(2, 4), Point(3, 3)));
-    edges.insert(make_pair(Point(3, 3), Point(2, 4)));
-    edges.insert(make_pair(Point(1, 5), Point(2, 4)));
-    edges.insert(make_pair(Point(2, 4), Point(1, 5)));
-    edges.insert(make_pair(Point(1, 5), Point(2, 6)));
-    edges.insert(make_pair(Point(2, 6), Point(1, 5)));
-    edges.insert(make_pair(Point(2, 4), Point(3, 5)));
-    edges.insert(make_pair(Point(3, 5), Point(2, 4)));
-    edges.insert(make_pair(Point(2, 6), Point(3, 5)));
-    edges.insert(make_pair(Point(3, 5), Point(2, 6)));
-    edges.insert(make_pair(Point(3, 3), Point(4, 4)));
-    edges.insert(make_pair(Point(4, 4), Point(3, 3)));
-    edges.insert(make_pair(Point(3, 5), Point(4, 4)));
-    edges.insert(make_pair(Point(4, 4), Point(3, 5)));
+using namespace std;
 
-    edges.insert(make_pair(Point(4, 4), Point(5, 3)));
-    edges.insert(make_pair(Point(5, 3), Point(4, 4)));
+static Token_t tiger;
 
-    edges.insert(make_pair(Point(5, 3), Point(6, 2)));
-    edges.insert(make_pair(Point(6, 2), Point(5, 3)));
-
-    edges.insert(make_pair(Point(6, 2), Point(7, 1)));
-    edges.insert(make_pair(Point(7, 1), Point(6, 2)));
-
-    edges.insert(make_pair(Point(7, 1), Point(8, 0)));
-    edges.insert(make_pair(Point(8, 0), Point(7, 1)));
-
-    edges.insert(make_pair(Point(8, 0), Point(9, 1)));
-    edges.insert(make_pair(Point(9, 1), Point(8, 0)));
-
-    edges.insert(make_pair(Point(9, 1), Point(10, 2)));
-    edges.insert(make_pair(Point(10, 2), Point(9, 1)));
-
-    edges.insert(make_pair(Point(10, 2), Point(11, 3)));
-    edges.insert(make_pair(Point(11, 3), Point(10, 2)));
-
-    edges.insert(make_pair(Point(11, 3), Point(12, 4)));
-    edges.insert(make_pair(Point(12, 4), Point(11, 3)));
-
-    edges.insert(make_pair(Point(12, 4), Point(11, 5)));
-    edges.insert(make_pair(Point(11, 5), Point(12, 4)));
-
-    edges.insert(make_pair(Point(11, 5), Point(10, 6)));
-    edges.insert(make_pair(Point(10, 6), Point(11, 5)));
-
-    edges.insert(make_pair(Point(10, 6), Point(9, 7)));
-    edges.insert(make_pair(Point(9, 7), Point(10, 6)));
-
-    edges.insert(make_pair(Point(9, 7), Point(8, 8)));
-    edges.insert(make_pair(Point(8, 8), Point(9, 7)));
-
-    edges.insert(make_pair(Point(8, 8), Point(7, 7)));
-    edges.insert(make_pair(Point(7, 7), Point(8, 8)));
-
-    edges.insert(make_pair(Point(7, 7), Point(6, 6)));
-    edges.insert(make_pair(Point(6, 6), Point(7, 7)));
-
-    edges.insert(make_pair(Point(6, 6), Point(5, 5)));
-    edges.insert(make_pair(Point(5, 5), Point(6, 6)));
-
-    edges.insert(make_pair(Point(5, 5), Point(4, 4)));
-    edges.insert(make_pair(Point(4, 4), Point(5, 5)));
-
-    return edges;
-}
 enum direction{ NONE,N,NE,E,SE,S,SW,W,NW };
 
 Move_t Move_TigersNTurtlenecks (vector<Token_t> tokens, Color_t turn);
@@ -92,6 +18,8 @@ double distance(Point_t p1, Point_t p2);
 direction hasEdgeBetween(Point_t point1, Point_t point2);
 bool isJumpable(const vector<Token_t>& tokens, const Token_t t);
 bool empty(Point_t p, vector<Token_t> tokens);
+bool  isForkable(vector<Token_t> tokens);
+Move_t getForkMove (vector<Token_t> tokens);
 
 //Man Functions
 bool menAboveAttackLine (vector<Token_t> tokens);
@@ -107,18 +35,18 @@ Move_t moveTowardMostMen(const vector<Token_t>& tokens);
 Move_t tigerJump(vector<Token_t> tokens);
 Move_t moveTowardClosestMan(const vector<Token_t>& tokens);
 int totalDistanceToAllMen(Point_t p, vector<Token_t> tokens);
+Move_t getForkMove (vector<Token_t> tokens);
 
 //TODO: following functions not done yet
 bool onDiagonalSquare(Token_t man);
-vector<Move_t> getForkMoves (vector<Token_t> tokens);
-vector<Point> potentialJumpLocations();
+
+vector<Point_t> potentialJumpLocations();
 bool onPositiveDiagonal();
 bool onNegativeDiagonal();
 
 struct marchMenPriority {
     bool operator()(Token_t t1, Token_t t2) {
-        if(t1.location.row != t2.location.row) return t1.location.row < t2.location.row;
-        return horizontalDistanceToTiger(t1, tiger) < horizontalDistanceToTiger(t2, tiger);
+        return t1.location.row < t2.location.row;
     }
 };
 
@@ -139,6 +67,9 @@ Move_t Move_TigersNTurtlenecks (vector<Token_t> tokens, Color_t turn) {
 
     //Tiger algorithm
     else {
+        if(getJumpableMen(tokens).size() > 1) {
+            return getForkMove(tokens);
+        }
         if(getJumpableMen(tokens).size() > 0) {
             return tigerJump(tokens);
         }
@@ -199,6 +130,7 @@ Move_t moveJumpableMan(vector<Token_t> jumpable, vector<Token_t> tokens) {
                     case NONE:
                         break;
                 }
+//                break;
             }
         }
     }
@@ -381,10 +313,10 @@ bool empty(Point_t p, vector<Token_t> tokens) {
     return true;
 }
 
-bool isNextMoveJumpable(vector<Token_t> tokens, Point_t nextLocation) {
+bool isNextMoveUnJumpable(vector<Token_t> tokens, Point_t currentLocation, Point_t nextLocation) {
     for (int i = 0; i < tokens.size(); i++) {
-        if (tokens.at(i).location == nextLocation) {
-            tokens.at(i).location.row--;
+        if (tokens.at(i).location == currentLocation) {
+            tokens.at(i).location = nextLocation;
             break;
         }
     }
@@ -396,6 +328,16 @@ bool isNextMoveJumpable(vector<Token_t> tokens, Point_t nextLocation) {
     }
 
     return true;
+}
+
+bool isNextMoveForkable(vector<Token_t> tokens, Point_t currentLocation, Point_t nextLocation) {
+    for (int i = 0; i < tokens.size(); i++) {
+        if (tokens.at(i).location == currentLocation) {
+            tokens.at(i).location = nextLocation;
+            break;
+        }
+    }
+    return isForkable(tokens);
 }
 
 Move_t marchForward(vector<Token_t> tokens) {
@@ -415,7 +357,7 @@ Move_t marchForward(vector<Token_t> tokens) {
         // Check if the spot in front is empty
         if (empty(nextSpot, tokens)) {
             // Only march if no jump is creaetd
-            if (isNextMoveJumpable(tokens, nextSpot)) {
+            if (isNextMoveUnJumpable(tokens, tmp.location, nextSpot) && !isNextMoveForkable(tokens, tmp.location, nextSpot)) {
                 return {tmp, nextSpot};
             }
         }
@@ -505,19 +447,15 @@ Move_t moveTowardMostMen(const vector<Token_t>& tokens) {
     for (int i = 0; i < 8; i++) {
         Point_t next = {current.row + d[i][0], current.col + d[i][1]};
 
-        // Must be within bounds
         if (next.row < 0 || next.row > GRID_ROW || next.col < 0 || next.col > GRID_COL)
             continue;
 
-        // Must be a legal board edge
         if (hasEdgeBetween(current, next) == NONE)
             continue;
 
-        // Must be empty
         if (!empty(next, tokens))
             continue;
 
-        // Calculate total distance from 'next' to all blue tokens
         int totalDistance = totalDistanceToAllMen(next, tokens);
 
         if (totalDistance < minTotalDistance) {
@@ -546,19 +484,16 @@ Move_t moveTowardClosestMan(const vector<Token_t>& tokens) {
     for (int i = 0; i < 8; i++) {
         Point_t next = {current.row + d[i][0], current.col + d[i][1]};
 
-        // 1. Check bounds
         if (next.row < 0 || next.row >= GRID_ROW || next.col < 0 || next.col >= GRID_COL)
             continue;
 
-        // 2. Must be connected via edge
         if (hasEdgeBetween(current, next) == NONE)
             continue;
 
-        // 3. Must be empty
+
         if (!empty(next, tokens))
             continue;
 
-        // 4. Find distance to nearest blue token
         int closestDist = INT_MAX;
         for (int i = 0; i < tokens.size(); i++) {
             Token_t t = tokens.at(i);
@@ -570,10 +505,9 @@ Move_t moveTowardClosestMan(const vector<Token_t>& tokens) {
             }
         }
 
-        // 5. Choose best move
         if (closestDist < minDistanceToClosestMan) {
             minDistanceToClosestMan = closestDist;
-            bestMove = {tiger, next};  // ✅ next is a Point_t
+            bestMove = {tiger, next};
             foundValidMove = true;
         }
     }
@@ -588,6 +522,39 @@ int totalDistanceToAllMen(Point_t p, vector<Token_t> tokens) {
         dist += distance(p, tokens[i].location);
     }
     return dist;
+}
+
+Move_t getForkMove (vector<Token_t> tokens) {
+    Point_t current = tokens[0].location;
+    const int d[8][2] = {
+            {-1,  0}, {-1,  1}, {0,  1}, {1,  1},
+            { 1,  0}, { 1, -1}, {0, -1}, {-1, -1}
+    };
+
+    for (int i = 0; i < 8; i++) {
+        Point_t next = {current.row + d[i][0], current.col + d[i][1]};
+        tokens[0].location = next;
+        if(getJumpableMen(tokens).size() > 1) {
+            return {tokens[0], next};
+        }
+    }
+    return {tokens[0], current};
+}
+bool  isForkable(vector<Token_t> tokens) {
+    Point_t current = tokens[0].location;
+    const int d[8][2] = {
+            {-1,  0}, {-1,  1}, {0,  1}, {1,  1},
+            { 1,  0}, { 1, -1}, {0, -1}, {-1, -1}
+    };
+
+    for (int i = 0; i < 8; i++) {
+        Point_t next = {current.row + d[i][0], current.col + d[i][1]};
+        tokens[0].location = next;
+        if(getJumpableMen(tokens).size() > 1) {
+            return true;
+        }
+    }
+    return false;
 }
 
 
