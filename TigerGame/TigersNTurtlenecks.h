@@ -157,7 +157,8 @@ Move_t moveJumpableMan(vector<Token_t> jumpable, vector<Token_t> tokens) {
     Token_t movedToken;
     Point_t dest = tokenInDanger.location;
 
-    for (Token_t j : tokens) {
+    for (int i = 0; i < tokens.size(); i++) {
+        Token_t j = tokens.at(i);
         if (tokenInDanger.location.row != j.location.row && tokenInDanger.location.col != j.location.col) {
             direction d = hasEdgeBetween(emptyPoint, j.location);
             if (d != NONE) {
@@ -327,12 +328,11 @@ bool isJumpable(const vector<Token_t> &tokens, const Token_t t) {
 
 vector<Token_t> getJumpableMen(const vector<Token_t> &tokens) {
     vector<Token_t> jumpableMen;
-    for (Token_t t : tokens) {
-        if (isJumpable(tokens, t)) {
-            jumpableMen.push_back(t);
+    for (int i = 0; i < tokens.size(); i++) {
+        if (isJumpable(tokens, tokens.at(i))) {
+            jumpableMen.push_back(tokens.at(i));
         }
     }
-
     return jumpableMen;
 }
 
@@ -348,9 +348,9 @@ bool isEndagered(const vector<Token_t> &tokens, const Token_t t) {
 
 vector<Token_t> getEndageredMen(const vector<Token_t> &tokens) {
     vector<Token_t> endagered;
-    for (Token_t t : tokens) {
-        if (isEndagered(tokens, t)) {
-            endagered.push_back(t);
+    for (int i = 0; i < tokens.size(); i++) {
+        if (isEndagered(tokens, tokens.at(0))) {
+            endagered.push_back(tokens.at(0));
         }
     }
 
@@ -358,8 +358,10 @@ vector<Token_t> getEndageredMen(const vector<Token_t> &tokens) {
 }
 
 bool menAboveAttackLine (vector<Token_t> tokens) {
-    for(Token_t i: tokens) {
-        if(i.color==BLUE&&i.location.row > 6) return false;
+    for (int i = 0; i < tokens.size(); i++) {
+        if (tokens.at(i).color == BLUE && tokens.at(i).location.row > 6) {
+            return false;
+        }
     }
     return true;
 }
@@ -369,17 +371,20 @@ Move_t marchForward(Token_t token) {
 }
 
 bool empty(Point_t p, vector<Token_t> tokens) {
-    for(Token_t i: tokens) {
-        if(i.location == p) return false;
+    for (int i = 0; i < tokens.size(); i++) {
+        if(tokens.at(i).location == p) {
+            return false;
+        }
     }
+
     return true;
 }
 
 Move_t marchForward(vector<Token_t> tokens) {
     priority_queue<Token_t, vector<Token_t>, marchMenPriority> sortedMen;
-    for (Token_t i : tokens) {
-        if (i.color == BLUE) {
-            sortedMen.push(i);
+    for (int i = 0; i < tokens.size(); i++) {
+        if (tokens.at(i).color == BLUE) {
+            sortedMen.push(tokens.at(i));
         }
     }
 
@@ -531,7 +536,8 @@ Move_t moveTowardClosestMan(const vector<Token_t>& tokens) {
 
         // 4. Find distance to nearest blue token
         int closestDist = INT_MAX;
-        for (const auto& t : tokens) {
+        for (int i = 0; i < tokens.size(); i++) {
+            Token_t t = tokens.at(i);
             if (t.color == BLUE) {
                 int dist = abs(t.location.row - next.row) + abs(t.location.col - next.col);
                 if (dist < closestDist) {
