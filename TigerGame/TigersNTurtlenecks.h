@@ -27,7 +27,9 @@ int horizontalDistanceToTiger(Token_t token, Token_t tiger);
 Move_t moveJumpableMan(vector<Token_t> jumpable, vector<Token_t> tokens);
 Point_t changePointBasedOnDirection(direction d, Point_t dest);
 Point_t findPotentialJumpLoc(Point_t tigerLocation, Point_t p);
-
+Point_t moveManCloserToTiger(vector<Token_t> tokens, Token_t token);
+int hamiltonianDistanceToTiger(Point_t p) {return abs(p.row-tiger.location.row)+abs(p.col-tiger.location.col);}
+vector<Token_t> adjacentMoves(vector<Token_t> tokens);
 //Tiger Functions
 vector<Token_t> getJumpableMen(const vector<Token_t>& tokens);
 Move_t moveTowardMostMen(const vector<Token_t>& tokens);
@@ -48,8 +50,23 @@ struct marchMenPriority {
     }
 };
 
+struct farthestFromTigerComparator {
+    bool operator() (Token_t t1, Token_t t2) {
+        if(distance(t1.location, tiger.location) == distance(t2.location, tiger.location)) return rand() > rand();
+        return distance(t1.location, tiger.location) < distance(t2.location, tiger.location);
+    }
+};
+
+struct closestFromTigerComparator {
+    bool operator() (Token_t t1, Token_t t2) {
+        if(distance(t1.location, tiger.location) == distance(t2.location, tiger.location)) return rand() > rand();
+        return distance(t1.location, tiger.location) > distance(t2.location, tiger.location);
+    }
+};
+
 //TODO this is the main function
 Move_t Move_TigersNTurtlenecks (vector<Token_t> tokens, Color_t turn) {
+    srand(time(NULL));
 
     tiger = tokens.at(0);
     if(turn == BLUE) {
@@ -154,7 +171,7 @@ Point_t changePointBasedOnDirection(direction d, Point_t dest) {
 }
 
 double distance(Point_t p1, Point_t p2) {
-    return abs(p1.row-p2.row) + abs(p1.col-p2.col);
+    return sqrt(pow(p1.row-p2.row,2) + pow(p1.col-p2.col, 2));
 }
 
 bool insideMainGrid(Point_t p) {
@@ -164,6 +181,9 @@ bool insideMainGrid(Point_t p) {
 direction hasEdgeBetween(Point_t point1, Point_t point2) {
     int rowDiff = point2.row - point1.row;
     int colDiff = point2.col - point1.col;
+
+    if(point1.row >= GRID_ROW || point1.col >= GRID_COL || point2.row >= GRID_ROW || point2.col >= GRID_COL
+        || point1.row < 0 || point1.col < 0 || point2.row < 0 || point2.col < 0) return NONE;
 
     // Check all 8 directions
     if(point2.row < 4) {
@@ -320,7 +340,18 @@ bool isNextMoveForkable(vector<Token_t> tokens, Point_t currentLocation, Point_t
 }
 
 Move_t marchForward(vector<Token_t> tokens) {
-    priority_queue<Token_t, vector<Token_t>, marchMenPriority> sortedMen;
+//    vector<Token_t> aggressiveMen = adjacentMoves(tokens);
+//
+//    for(int i = 0; i < aggressiveMen.size(); i++) {
+//        Token_t tmp = aggressiveMen.at(i);
+//        Point_t nextSpot = moveManCloserToTiger(tokens, tmp);
+//
+//        if (!isNextMoveJumpable(tokens, tmp.location, nextSpot) && !isNextMoveForkable(tokens, tmp.location, nextSpot)) {
+//            return {tmp, nextSpot};
+//        }
+//    }
+
+    priority_queue<Token_t, vector<Token_t>, farthestFromTigerComparator> sortedMen;
     for (int i = 0; i < tokens.size(); i++) {
         if (tokens.at(i).color == BLUE) {
             sortedMen.push(tokens.at(i));
@@ -331,7 +362,7 @@ Move_t marchForward(vector<Token_t> tokens) {
         Token_t tmp = sortedMen.top();
         sortedMen.pop();
 
-        Point_t nextSpot = {tmp.location.row - 1, tmp.location.col};
+        Point_t nextSpot = moveManCloserToTiger(tokens, tmp);
 
         // Check if the spot in front is empty
         if (empty(nextSpot, tokens)) {
@@ -547,6 +578,38 @@ bool  isForkable(vector<Token_t> tokens) {
         }
     }
     return false;
+}
+
+Point_t moveManCloserToTiger(vector<Token_t> tokens, Token_t token) {
+    double distanceToTiger = distance(tiger.location, token.location);
+    const Point_t currentPoint = token.location;
+
+    Point_t bestPoint = currentPoint;
+    double closestToTiger = distanceToTiger;
+
+    const int d[8][2] = {
+            {-1,  0}, {-1,  1}, {0,  1}, {1,  1},
+            { 1,  0}, { 1, -1}, {0, -1}, {-1, -1}
+    };
+
+    for(int i = 0; i < 8; i++) {
+        Point_t nextPoint = {currentPoint.row + d[i][0], currentPoint.col + d[i][1]};
+        if(hasEdgeBetween(currentPoint, nextPoint) != NONE && empty(nextPoint, tokens)) {
+            if(distance(nextPoint, tiger.location) < closestToTiger) {
+                closestToTiger = distance(nextPoint, tiger.location);
+                bestPoint = nextPoint;
+            }
+        }
+    }
+    return bestPoint;
+}
+
+vector<Token_t> adjacentMoves(vector<Token_t> tokens) {
+    vector<Token_t> ans;
+    for(Token_t i: tokens) {
+        if(hamiltonianDistanceToTiger(i.location) == 2) ans.push_back(i);
+    }
+    return ans;
 }
 
 #endif //TIGERGAME_TIGERSNTURTLENECKS_H
