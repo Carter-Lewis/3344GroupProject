@@ -43,9 +43,6 @@ bool isEndangered(const vector<Token_t> &tokens, const Token_t t);
 vector<Token_t> getEndangeredMen(const vector<Token_t> &tokens);
 Move_t moveTowardEndangeredMan(const vector<Token_t>& tokens, const vector<Token_t> &endangered);
 
-//TODO: following functions not done yet
-vector<Point_t> potentialJumpLocations();
-
 struct marchMenPriority {
     bool operator()(Token_t t1, Token_t t2) {
         if(t1.location.row == t2.location.row) return horizontalDistanceToTiger(t1, tiger) < horizontalDistanceToTiger(t2, tiger);
@@ -81,9 +78,9 @@ Move_t Move_TigersNTurtlenecks (vector<Token_t> tokens, Color_t turn) {
         //     like is jumpable but more lenient...
         //     not sure if we need it
         // }
-        if (menAboveAttackLine(tokens)) {
-            //move things inward on the sides
-        }
+        // if (menAboveAttackLine(tokens)) {
+        //     //move things inward on the sides
+        // }
         return marchForward(tokens);
     }
 
@@ -512,33 +509,33 @@ Move_t moveTowardClosestMan(const vector<Token_t>& tokens) {
 
 Move_t moveTowardEndangeredMan(const vector<Token_t>& tokens, const vector<Token_t> &endangered) {
     const Token_t& tiger = tokens[0];  // Assume tiger is at index 0
-    Point_t current = tiger.location;
+    Point_t currTiger = tiger.location;
 
     const int d[8][2] = {
         {-1,  0}, {-1,  1}, {0,  1}, {1,  1},
         { 1,  0}, { 1, -1}, {0, -1}, {-1, -1}
     };
 
-    Move_t bestMove = {tiger, current};  // Default to no move
+    Move_t bestMove = {tiger, currTiger};  // Default to no move
     int minDistToClosestEndangered = INT_MAX;
     bool foundValidMove = false;
 
     for (int i = 0; i < 8; i++) {
-        Point_t next = {current.row + d[i][0], current.col + d[i][1]};
+        Point_t nextTiger = {currTiger.row + d[i][0], currTiger.col + d[i][1]};
 
         // 2. Must be connected via edge
-        if (hasEdgeBetween(current, next) == NONE)
+        if (hasEdgeBetween(currTiger, nextTiger) == NONE)
             continue;
 
         // 3. Must be empty
-        if (!empty(next, tokens))
+        if (!empty(nextTiger, tokens))
             continue;
 
         // 4. Find distance to nearest blue token
         int closestDist = INT_MAX;
         for (int i = 0; i < endangered.size(); i++) {
             Token_t t = tokens.at(i);
-            int dist = abs(t.location.row - next.row) + abs(t.location.col - next.col);
+            int dist = abs(t.location.row - nextTiger.row) + abs(t.location.col - nextTiger.col);
             if (dist < closestDist) {
                 closestDist = dist;
             }
@@ -547,7 +544,7 @@ Move_t moveTowardEndangeredMan(const vector<Token_t>& tokens, const vector<Token
         // 5. Choose best move
         if (closestDist < minDistToClosestEndangered) {
             minDistToClosestEndangered = closestDist;
-            bestMove = {tiger, next};
+            bestMove = {tiger, nextTiger};
             foundValidMove = true;
         }
     }
@@ -555,7 +552,7 @@ Move_t moveTowardEndangeredMan(const vector<Token_t>& tokens, const vector<Token
     if (foundValidMove) {
         return bestMove;
     }
-    return Move_t{tiger, {current.row++, current.col}};
+    return Move_t{tiger, {currTiger.row++, currTiger.col}};
     //return foundValidMove ? bestMove : Move_t{tiger, {current.row+1, current.col}};  // fallback to current pos
 }
 
