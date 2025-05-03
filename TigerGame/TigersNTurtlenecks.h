@@ -25,8 +25,8 @@ Move_t marchForward(Token_t token);
 Move_t marchForward(vector<Token_t> tokens);
 int horizontalDistanceToTiger(Token_t token, Token_t tiger);
 Move_t moveJumpableMan(vector<Token_t> jumpable, vector<Token_t> tokens);
+Point_t changePointBasedOnDirection(direction d, Point_t dest);
 Point_t findPotentialJumpLoc(Point_t tigerLocation, Point_t p);
-
 
 //Tiger Functions
 vector<Token_t> getJumpableMen(const vector<Token_t>& tokens);
@@ -88,7 +88,7 @@ Move_t moveJumpableMan(vector<Token_t> jumpable, vector<Token_t> tokens) {
     Point_t emptyPoint = findPotentialJumpLoc(tokens[0].location, tokenInDanger.location);
 
     Token_t movedToken;
-    Point_t dest = tokenInDanger.location;
+    Point_t dest = tokenInDanger.location;  //temporary, just in case nothing works
 
     for (int i = 0; i < tokens.size(); i++) {
         Token_t tmp = tokens.at(i);
@@ -99,84 +99,58 @@ Move_t moveJumpableMan(vector<Token_t> jumpable, vector<Token_t> tokens) {
                 movedToken.location = tmp.location;
 
                 dest = tmp.location;
-
-                switch(d) {
-                    case S:
-                        dest.row--;
-                        break;
-
-                    case SE:
-                        dest.row--;
-                        dest.col--;
-                        break;
-                    case SW:
-                        dest.row--;
-                        dest.col++;
-                        break;
-
-                    case N:
-                        dest.row++;
-                        break;
-                    case NE:
-                        dest.row++;
-                        dest.col--;
-                        break;
-                    case NW:
-                        dest.col++;
-                        dest.row++;
-                        break;
-
-                    case E:
-                        dest.col--;
-                        break;
-                    case W:
-                        dest.col++;
-                        break;
-                }
+                dest = changePointBasedOnDirection(d, dest);
                 break;
             }
         }
     }
 
     if (dest == tokenInDanger.location) {
-        switch(hasEdgeBetween(emptyPoint, tokenInDanger.location)) {
-            case NONE:
-                break;
-            case S:
-                dest.row--;
-                break;
-
-            case SE:
-                dest.row--;
-                dest.col--;
-                break;
-            case SW:
-                dest.row--;
-                dest.col++;
-                break;
-
-            case N:
-                dest.row++;
-                break;
-            case NE:
-                dest.row++;
-                dest.col--;
-                break;
-            case NW:
-                dest.col++;
-                dest.row++;
-                break;
-
-            case E:
-                dest.col--;
-                break;
-            case W:
-                dest.col++;
-                break;
-        }
+        direction d = hasEdgeBetween(emptyPoint, tokenInDanger.location);
+        dest = changePointBasedOnDirection(d, dest);
     }
 
     return {movedToken, dest};
+}
+
+Point_t changePointBasedOnDirection(direction d, Point_t dest) {
+    switch (d) {
+        case NONE:
+            break;
+        case S:
+            dest.row--;
+            break;
+
+        case SE:
+            dest.row--;
+            dest.col--;
+            break;
+        case SW:
+            dest.row--;
+            dest.col++;
+            break;
+
+        case N:
+            dest.row++;
+            break;
+        case NE:
+            dest.row++;
+            dest.col--;
+            break;
+        case NW:
+            dest.col++;
+            dest.row++;
+            break;
+
+        case E:
+            dest.col--;
+            break;
+        case W:
+            dest.col++;
+            break;
+    }
+
+    return dest;
 }
 
 double distance(Point_t p1, Point_t p2) {
@@ -276,25 +250,25 @@ vector<Token_t> getJumpableMen(const vector<Token_t> &tokens) {
     return jumpableMen;
 }
 
-bool isEndagered(const vector<Token_t> &tokens, const Token_t t) {
-    bool result = true;
-
-    //TODO figure this out
-
-
-    return result;
-}
-
-vector<Token_t> getEndageredMen(const vector<Token_t> &tokens) {
-    vector<Token_t> endagered;
-    for (int i = 0; i < tokens.size(); i++) {
-        if (isEndagered(tokens, tokens.at(0))) {
-            endagered.push_back(tokens.at(0));
-        }
-    }
-
-    return endagered;
-}
+// bool isEndagered(const vector<Token_t> &tokens, const Token_t t) {
+//     bool result = true;
+//
+//     //TODO figure this out
+//
+//
+//     return result;
+// }
+//
+// vector<Token_t> getEndageredMen(const vector<Token_t> &tokens) {
+//     vector<Token_t> endagered;
+//     for (int i = 0; i < tokens.size(); i++) {
+//         if (isEndagered(tokens, tokens.at(0))) {
+//             endagered.push_back(tokens.at(0));
+//         }
+//     }
+//
+//     return endagered;
+// }
 
 bool menAboveAttackLine (vector<Token_t> tokens) {
     for (int i = 0; i < tokens.size(); i++) {
@@ -370,7 +344,7 @@ Move_t marchForward(vector<Token_t> tokens) {
     return moveJumpableMan(getJumpableMen(tokens), tokens);
 
     // No valid forward moves
-    return {tokens[1], tokens[1].location};  // fallback: return a no-op move
+    // return {tokens[1], tokens[1].location};  // fallback: return a no-op move
 }
 
 
@@ -539,34 +513,34 @@ int totalDistanceToAllMen(Point_t p, vector<Token_t> tokens) {
 }
 
 Move_t getForkMove (vector<Token_t> tokens) {
-    const Point_t current = tokens[0].location;
+    const Point_t currTiger = tokens[0].location;
     const int d[8][2] = {
             {-1,  0}, {-1,  1}, {0,  1}, {1,  1},
             { 1,  0}, { 1, -1}, {0, -1}, {-1, -1}
     };
 
     for (int i = 0; i < 8; i++) {
-        Point_t next = {current.row + d[i][0], current.col + d[i][1]};
-        if(hasEdgeBetween(current, next) != NONE && empty(next, tokens)) {
-            tokens[0].location = next;
+        Point_t nextTiger = {currTiger.row + d[i][0], currTiger.col + d[i][1]};
+        if(hasEdgeBetween(currTiger, nextTiger) != NONE && empty(nextTiger, tokens)) {
+            tokens[0].location = nextTiger;
             if(getJumpableMen(tokens).size() > 1) {
-                return {tokens[0], next};
+                return {tokens[0], nextTiger};
             }
         }
     }
-    return {tokens[0], current};
+    return {tokens[0], currTiger};
 }
 bool  isForkable(vector<Token_t> tokens) {
-    const Point_t current = tokens[0].location;
+    const Point_t currTiger = tokens[0].location;
     const int d[8][2] = {
             {-1,  0}, {-1,  1}, {0,  1}, {1,  1},
             { 1,  0}, { 1, -1}, {0, -1}, {-1, -1}
     };
 
     for (int i = 0; i < 8; i++) {
-        Point_t next = {current.row + d[i][0], current.col + d[i][1]};
-        if(hasEdgeBetween(current, next) != NONE && empty(next, tokens)) {
-            tokens[0].location = next;
+        Point_t nextTiger = {currTiger.row + d[i][0], currTiger.col + d[i][1]};
+        if(hasEdgeBetween(currTiger, nextTiger) != NONE && empty(nextTiger, tokens)) {
+            tokens[0].location = nextTiger;
             if(getJumpableMen(tokens).size() > 1) {
                 return true;
             }
@@ -574,6 +548,5 @@ bool  isForkable(vector<Token_t> tokens) {
     }
     return false;
 }
-
 
 #endif //TIGERGAME_TIGERSNTURTLENECKS_H
