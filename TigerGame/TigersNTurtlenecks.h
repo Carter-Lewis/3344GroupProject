@@ -29,6 +29,8 @@ Point_t changePointBasedOnDirection(direction d, Point_t dest);
 Point_t findPotentialJumpLoc(Point_t tigerLocation, Point_t p);
 Point_t moveManCloserToTiger(vector<Token_t> tokens, Token_t token);
 int hamiltonianDistanceToTiger(Point_t p) {return abs(p.row-tiger.location.row)+abs(p.col-tiger.location.col);}
+//vector<Point_t> shortestPathToTiger(Token_t man);
+//vector<Point_t> shortestPathToTiger(Point_t point, vector<Point_t>& moves, vector<Token_t> tokens);
 vector<Token_t> adjacentMoves(vector<Token_t> tokens);
 //Tiger Functions
 vector<Token_t> getJumpableMen(const vector<Token_t>& tokens);
@@ -270,25 +272,22 @@ vector<Token_t> getJumpableMen(const vector<Token_t> &tokens) {
     return jumpableMen;
 }
 
-// bool isEndagered(const vector<Token_t> &tokens, const Token_t t) {
-//     bool result = true;
-//
-//     //TODO figure this out
-//
-//
-//     return result;
-// }
-//
-// vector<Token_t> getEndageredMen(const vector<Token_t> &tokens) {
-//     vector<Token_t> endagered;
-//     for (int i = 0; i < tokens.size(); i++) {
-//         if (isEndagered(tokens, tokens.at(0))) {
-//             endagered.push_back(tokens.at(0));
-//         }
-//     }
-//
-//     return endagered;
-// }
+ bool isEndagered(const vector<Token_t> &tokens, const Token_t t) {
+     bool result = true;
+
+     return result;
+ }
+
+ vector<Token_t> getEndageredMen(const vector<Token_t> &tokens) {
+     vector<Token_t> endagered;
+     for (int i = 0; i < tokens.size(); i++) {
+         if (isEndagered(tokens, tokens.at(0))) {
+             endagered.push_back(tokens.at(0));
+         }
+     }
+
+     return endagered;
+ }
 
 bool menAboveAttackLine (vector<Token_t> tokens) {
     for (int i = 0; i < tokens.size(); i++) {
@@ -340,17 +339,6 @@ bool isNextMoveForkable(vector<Token_t> tokens, Point_t currentLocation, Point_t
 }
 
 Move_t marchForward(vector<Token_t> tokens) {
-//    vector<Token_t> aggressiveMen = adjacentMoves(tokens);
-//
-//    for(int i = 0; i < aggressiveMen.size(); i++) {
-//        Token_t tmp = aggressiveMen.at(i);
-//        Point_t nextSpot = moveManCloserToTiger(tokens, tmp);
-//
-//        if (!isNextMoveJumpable(tokens, tmp.location, nextSpot) && !isNextMoveForkable(tokens, tmp.location, nextSpot)) {
-//            return {tmp, nextSpot};
-//        }
-//    }
-
     priority_queue<Token_t, vector<Token_t>, farthestFromTigerComparator> sortedMen;
     for (int i = 0; i < tokens.size(); i++) {
         if (tokens.at(i).color == BLUE) {
@@ -611,5 +599,22 @@ vector<Token_t> adjacentMoves(vector<Token_t> tokens) {
     }
     return ans;
 }
+
+//vector<Point_t> shortestPathToTiger(Point_t point, vector<Point_t>& moves, vector<Token_t> tokens) {
+//    if(point == tiger.location) {
+//        return moves;
+//    }
+//    const int d[8][2] = {
+//            {-1,  0}, {-1,  1}, {0,  1}, {1,  1},
+//            { 1,  0}, { 1, -1}, {0, -1}, {-1, -1}
+//    };
+//    for(int i = 0; i < 8; i++) {
+//        Point_t nextPoint = {point.row + d[i][0], point.col + d[i][1]};
+//        if(hasEdgeBetween(point, nextPoint) != NONE && empty(nextPoint, tokens) && find(moves.begin(), moves.end(), point) != moves.end()) {
+//            shortestPathToTiger(nextPoint, moves, tokens);
+//        }
+//    }
+//    moves.push_back(point);
+//}
 
 #endif //TIGERGAME_TIGERSNTURTLENECKS_H
