@@ -27,6 +27,7 @@ int horizontalDistanceToTiger(Token_t token, Token_t tiger);
 Move_t moveJumpableMan(vector<Token_t> jumpable, vector<Token_t> tokens);
 Point_t findPotentialJumpLoc(Point_t tigerLocation, Point_t p);
 
+
 //Tiger Functions
 vector<Token_t> getJumpableMen(const vector<Token_t>& tokens);
 Move_t moveTowardMostMen(const vector<Token_t>& tokens);
@@ -42,6 +43,7 @@ bool onNegativeDiagonal();
 
 struct marchMenPriority {
     bool operator()(Token_t t1, Token_t t2) {
+        if(t1.location.row == t2.location.row) return horizontalDistanceToTiger(t1, tiger) < horizontalDistanceToTiger(t2, tiger);
         return t1.location.row < t2.location.row;
     }
 };
@@ -90,7 +92,7 @@ Move_t moveJumpableMan(vector<Token_t> jumpable, vector<Token_t> tokens) {
 
     for (int i = 0; i < tokens.size(); i++) {
         Token_t tmp = tokens.at(i);
-        if (tokenInDanger.location.row != tmp.location.row && tokenInDanger.location.col != tmp.location.col) {
+        if (tokenInDanger.location.row != tmp.location.row || tokenInDanger.location.col != tmp.location.col) {
             direction d = hasEdgeBetween(emptyPoint, tmp.location);
             if (d != NONE) {
                 movedToken.color = tmp.color;
@@ -365,6 +367,7 @@ Move_t marchForward(vector<Token_t> tokens) {
             }
         }
     }
+    return moveJumpableMan(getJumpableMen(tokens), tokens);
 
     // No valid forward moves
     return {tokens[1], tokens[1].location};  // fallback: return a no-op move
@@ -536,7 +539,7 @@ int totalDistanceToAllMen(Point_t p, vector<Token_t> tokens) {
 }
 
 Move_t getForkMove (vector<Token_t> tokens) {
-    Point_t current = tokens[0].location;
+    const Point_t current = tokens[0].location;
     const int d[8][2] = {
             {-1,  0}, {-1,  1}, {0,  1}, {1,  1},
             { 1,  0}, { 1, -1}, {0, -1}, {-1, -1}
@@ -544,7 +547,7 @@ Move_t getForkMove (vector<Token_t> tokens) {
 
     for (int i = 0; i < 8; i++) {
         Point_t next = {current.row + d[i][0], current.col + d[i][1]};
-        if(empty(next, tokens)) {
+        if(hasEdgeBetween(current, next) != NONE && empty(next, tokens)) {
             tokens[0].location = next;
             if(getJumpableMen(tokens).size() > 1) {
                 return {tokens[0], next};
@@ -554,7 +557,7 @@ Move_t getForkMove (vector<Token_t> tokens) {
     return {tokens[0], current};
 }
 bool  isForkable(vector<Token_t> tokens) {
-    Point_t current = tokens[0].location;
+    const Point_t current = tokens[0].location;
     const int d[8][2] = {
             {-1,  0}, {-1,  1}, {0,  1}, {1,  1},
             { 1,  0}, { 1, -1}, {0, -1}, {-1, -1}
@@ -562,7 +565,7 @@ bool  isForkable(vector<Token_t> tokens) {
 
     for (int i = 0; i < 8; i++) {
         Point_t next = {current.row + d[i][0], current.col + d[i][1]};
-        if(empty(next, tokens)) {
+        if(hasEdgeBetween(current, next) != NONE && empty(next, tokens)) {
             tokens[0].location = next;
             if(getJumpableMen(tokens).size() > 1) {
                 return true;
