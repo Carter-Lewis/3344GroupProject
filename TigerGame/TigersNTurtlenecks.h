@@ -272,22 +272,32 @@ vector<Token_t> getJumpableMen(const vector<Token_t> &tokens) {
     return jumpableMen;
 }
 
- bool isEndagered(const vector<Token_t> &tokens, const Token_t t) {
-     bool result = true;
+bool isEndagered(const vector<Token_t> &tokens, const Token_t t) {
+    bool result = false;
+    Point_t curr = t.location;
 
-     return result;
- }
+    if (empty({curr.row++, curr.col}, tokens) &&
+        empty({curr.row--, curr.col}, tokens)) {
+        result = true;
+    }
+    if (empty({curr.row, curr.col++}, tokens) &&
+        empty({curr.row, curr.col--}, tokens)) {
+        result = true;
+    }
 
- vector<Token_t> getEndageredMen(const vector<Token_t> &tokens) {
-     vector<Token_t> endagered;
-     for (int i = 0; i < tokens.size(); i++) {
-         if (isEndagered(tokens, tokens.at(0))) {
-             endagered.push_back(tokens.at(0));
-         }
-     }
+    return result;
+}
 
-     return endagered;
- }
+vector<Token_t> getEndageredMen(const vector<Token_t> &tokens) {
+    vector<Token_t> endagered;
+    for (int i = 0; i < tokens.size(); i++) {
+        if (isEndagered(tokens, tokens.at(0))) {
+            endagered.push_back(tokens.at(0));
+        }
+    }
+
+    return endagered;
+}
 
 bool menAboveAttackLine (vector<Token_t> tokens) {
     for (int i = 0; i < tokens.size(); i++) {
