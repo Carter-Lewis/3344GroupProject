@@ -198,7 +198,7 @@ int main() {
             game.reset(g);
         }
 
-        g.Sleep(750);
+        g.Sleep(1000);
     }
     return 0;
 }

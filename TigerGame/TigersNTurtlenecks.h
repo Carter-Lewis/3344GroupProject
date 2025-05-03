@@ -9,77 +9,6 @@
 using namespace std;
 static Token_t tiger;
 
-set<pair<Point, Point>> diagonalEdgeList() {
-    set<pair<Point, Point>> edges;
-    edges.insert(make_pair(Point(0, 4), Point(1, 3)));
-    edges.insert(make_pair(Point(1, 3), Point(0, 4)));
-    edges.insert(make_pair(Point(0, 4), Point(1, 5)));
-    edges.insert(make_pair(Point(1, 5), Point(0, 4)));
-    edges.insert(make_pair(Point(1, 3), Point(2, 2)));
-    edges.insert(make_pair(Point(2, 2), Point(1, 3)));
-    edges.insert(make_pair(Point(2, 2), Point(3, 3)));
-    edges.insert(make_pair(Point(3, 3), Point(2, 2)));
-    edges.insert(make_pair(Point(1, 3), Point(2, 4)));
-    edges.insert(make_pair(Point(2, 4), Point(1, 3)));
-    edges.insert(make_pair(Point(2, 4), Point(3, 3)));
-    edges.insert(make_pair(Point(3, 3), Point(2, 4)));
-    edges.insert(make_pair(Point(1, 5), Point(2, 4)));
-    edges.insert(make_pair(Point(2, 4), Point(1, 5)));
-    edges.insert(make_pair(Point(1, 5), Point(2, 6)));
-    edges.insert(make_pair(Point(2, 6), Point(1, 5)));
-    edges.insert(make_pair(Point(2, 4), Point(3, 5)));
-    edges.insert(make_pair(Point(3, 5), Point(2, 4)));
-    edges.insert(make_pair(Point(2, 6), Point(3, 5)));
-    edges.insert(make_pair(Point(3, 5), Point(2, 6)));
-    edges.insert(make_pair(Point(3, 3), Point(4, 4)));
-    edges.insert(make_pair(Point(4, 4), Point(3, 3)));
-    edges.insert(make_pair(Point(3, 5), Point(4, 4)));
-    edges.insert(make_pair(Point(4, 4), Point(3, 5)));
-
-    edges.insert(make_pair(Point(4, 4), Point(5, 3)));
-    edges.insert(make_pair(Point(5, 3), Point(4, 4)));
-
-    edges.insert(make_pair(Point(5, 3), Point(6, 2)));
-    edges.insert(make_pair(Point(6, 2), Point(5, 3)));
-
-    edges.insert(make_pair(Point(6, 2), Point(7, 1)));
-    edges.insert(make_pair(Point(7, 1), Point(6, 2)));
-
-    edges.insert(make_pair(Point(7, 1), Point(8, 0)));
-    edges.insert(make_pair(Point(8, 0), Point(7, 1)));
-
-    edges.insert(make_pair(Point(8, 0), Point(9, 1)));
-    edges.insert(make_pair(Point(9, 1), Point(8, 0)));
-
-    edges.insert(make_pair(Point(9, 1), Point(10, 2)));
-    edges.insert(make_pair(Point(10, 2), Point(9, 1)));
-
-    edges.insert(make_pair(Point(12, 4), Point(11, 5)));
-    edges.insert(make_pair(Point(11, 5), Point(12, 4)));
-
-    edges.insert(make_pair(Point(11, 5), Point(10, 6)));
-    edges.insert(make_pair(Point(10, 6), Point(11, 5)));
-
-    edges.insert(make_pair(Point(10, 6), Point(9, 7)));
-    edges.insert(make_pair(Point(9, 7), Point(10, 6)));
-
-    edges.insert(make_pair(Point(9, 7), Point(8, 8)));
-    edges.insert(make_pair(Point(8, 8), Point(9, 7)));
-
-    edges.insert(make_pair(Point(8, 8), Point(7, 7)));
-    edges.insert(make_pair(Point(7, 7), Point(8, 8)));
-
-    edges.insert(make_pair(Point(7, 7), Point(6, 6)));
-    edges.insert(make_pair(Point(6, 6), Point(7, 7)));
-
-    edges.insert(make_pair(Point(6, 6), Point(5, 5)));
-    edges.insert(make_pair(Point(5, 5), Point(6, 6)));
-
-    edges.insert(make_pair(Point(5, 5), Point(4, 4)));
-    edges.insert(make_pair(Point(4, 4), Point(5, 5)));
-
-    return edges;
-}
 enum direction{ NONE,N,NE,E,SE,S,SW,W,NW };
 
 Move_t Move_TigersNTurtlenecks (vector<Token_t> tokens, Color_t turn);
@@ -123,9 +52,9 @@ Move_t Move_TigersNTurtlenecks (vector<Token_t> tokens, Color_t turn) {
     tiger = tokens.at(0);
     if(turn == BLUE) {
         vector<Token_t> jumpable = getJumpableMen(tokens);
-        if(!jumpable.empty()) {
-            return moveJumpableMan(jumpable, tokens);
-        }
+//        if(!jumpable.empty()) {
+//            return moveJumpableMan(jumpable, tokens);
+//        }
         // if (!endangered.empty()) {
         //     like is jumpable but more lenient...
         //     not sure if we need it
@@ -387,7 +316,7 @@ bool empty(Point_t p, vector<Token_t> tokens) {
     return true;
 }
 
-bool isNextMoveUnJumpable(vector<Token_t> tokens, Point_t currentLocation, Point_t nextLocation) {
+bool isNextMoveJumpable(vector<Token_t> tokens, Point_t currentLocation, Point_t nextLocation) {
     for (int i = 0; i < tokens.size(); i++) {
         if (tokens.at(i).location == currentLocation) {
             tokens.at(i).location = nextLocation;
@@ -397,11 +326,11 @@ bool isNextMoveUnJumpable(vector<Token_t> tokens, Point_t currentLocation, Point
 
     for (Token_t t : tokens) {
         if (isJumpable(tokens, t)) {
-            return false;
+            return true;
         }
     }
 
-    return true;
+    return false;
 }
 
 bool isNextMoveForkable(vector<Token_t> tokens, Point_t currentLocation, Point_t nextLocation) {
@@ -431,7 +360,7 @@ Move_t marchForward(vector<Token_t> tokens) {
         // Check if the spot in front is empty
         if (empty(nextSpot, tokens)) {
             // Only march if no jump is creaetd
-            if (isNextMoveUnJumpable(tokens, tmp.location, nextSpot) && !isNextMoveForkable(tokens, tmp.location, nextSpot)) {
+            if (!isNextMoveJumpable(tokens, tmp.location, nextSpot) && !isNextMoveForkable(tokens, tmp.location, nextSpot)) {
                 return {tmp, nextSpot};
             }
         }
@@ -615,9 +544,11 @@ Move_t getForkMove (vector<Token_t> tokens) {
 
     for (int i = 0; i < 8; i++) {
         Point_t next = {current.row + d[i][0], current.col + d[i][1]};
-        tokens[0].location = next;
-        if(getJumpableMen(tokens).size() > 1) {
-            return {tokens[0], next};
+        if(empty(next, tokens)) {
+            tokens[0].location = next;
+            if(getJumpableMen(tokens).size() > 1) {
+                return {tokens[0], next};
+            }
         }
     }
     return {tokens[0], current};
@@ -631,9 +562,11 @@ bool  isForkable(vector<Token_t> tokens) {
 
     for (int i = 0; i < 8; i++) {
         Point_t next = {current.row + d[i][0], current.col + d[i][1]};
-        tokens[0].location = next;
-        if(getJumpableMen(tokens).size() > 1) {
-            return true;
+        if(empty(next, tokens)) {
+            tokens[0].location = next;
+            if(getJumpableMen(tokens).size() > 1) {
+                return true;
+            }
         }
     }
     return false;
