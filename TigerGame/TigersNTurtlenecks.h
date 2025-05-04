@@ -103,33 +103,37 @@ Move_t Move_TigersNTurtlenecks (vector<Token_t> tokens, Color_t turn) {
 }
 
 Move_t moveJumpableMan(vector<Token_t> jumpable, vector<Token_t> tokens) {
-    Token_t tokenInDanger = jumpable.front();
-    Point_t emptyPoint = findPotentialJumpLoc(tokens[0].location, tokenInDanger.location);
+    if(jumpable.size() > 0) {
+        Token_t tokenInDanger = jumpable.front();
+        Point_t emptyPoint = findPotentialJumpLoc(tokens[0].location, tokenInDanger.location);
 
-    Token_t movedToken;
-    Point_t dest = tokenInDanger.location;  //temporary, just in case nothing works
+        Token_t movedToken;
+        Point_t dest = tokenInDanger.location;  //temporary, just in case nothing works
 
-    for (int i = 0; i < tokens.size(); i++) {
-        Token_t tmp = tokens.at(i);
-        if (tokenInDanger.location.row != tmp.location.row || tokenInDanger.location.col != tmp.location.col) {
-            direction d = hasEdgeBetween(emptyPoint, tmp.location);
-            if (d != NONE) {
-                movedToken.color = tmp.color;
-                movedToken.location = tmp.location;
+        for (int i = 0; i < tokens.size(); i++) {
+            Token_t tmp = tokens.at(i);
+            if (tokenInDanger.location.row != tmp.location.row || tokenInDanger.location.col != tmp.location.col) {
+                direction d = hasEdgeBetween(emptyPoint, tmp.location);
+                if (d != NONE) {
+                    movedToken.color = tmp.color;
+                    movedToken.location = tmp.location;
 
-                dest = tmp.location;
-                dest = changePointBasedOnDirection(d, dest);
-                break;
+                    dest = tmp.location;
+                    dest = changePointBasedOnDirection(d, dest);
+                    break;
+                }
             }
         }
-    }
 
-    if (dest == tokenInDanger.location) {
-        direction d = hasEdgeBetween(emptyPoint, tokenInDanger.location);
-        dest = changePointBasedOnDirection(d, dest);
-    }
+        if (dest == tokenInDanger.location) {
+            direction d = hasEdgeBetween(emptyPoint, tokenInDanger.location);
+            dest = changePointBasedOnDirection(d, dest);
+        }
 
-    return {movedToken, dest};
+        return {movedToken, dest};
+    }
+    int index = 1 + rand() % (tokens.size() - 1);
+    return {tokens.at(index), moveManCloserToTiger(tokens, tokens.at(index))};
 }
 
 Point_t changePointBasedOnDirection(direction d, Point_t dest) {
